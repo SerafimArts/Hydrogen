@@ -1,0 +1,15 @@
+{
+    "name": "serafim/hydrogen",
+    "type": "library",
+    "license": "MIT",
+    "description": "",
+    "require": {
+        "php": ">=7.1",
+        "doctrine/orm": "~2.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Serafim\\Hydrogen\\": "src/"
+        }
+    }
+}
