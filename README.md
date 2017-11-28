@@ -126,33 +126,29 @@ some new features have been added:
 - Added support for global function calls using the [Higher Order Messaging](https://en.wikipedia.org/wiki/Higher_order_message)
  and the [Pattern Matching](https://en.wikipedia.org/wiki/Pattern_matching).
  
-### Higher Order Messaging improvements
+### Higher Order Messaging
 
-Simple code example.
+
+Pattern "`_`" is used to specify the location of the delegate in
+the function arguments in the higher-order messaging.
 
 ```php
 use Serafim\Hydrogen\Collection;
 
-Collection::make(['23', '42', 'some'])->map->intval(_)->toArray(); // [23, 42, 0]
-``` 
-
-This pattern "_" is used to specify the location of the delegate in
-the function arguments in the higher-order messaging.
-
-Example 1:
-
-```php
-$array = Collection::make(...)->map->intval(_, 10)->toArray();
-
+Collection::make(['23', '42', 'some'])
+    ->map->intval(_)
+    ->toArray(); // [23, 42, 0]
+    
 // Is similar with:
 
 $array = \array_map(function ($item): int {
      return \intval($item, 10);
      //             ^^^^^ - pattern "_" will replaced to each delegated item value.
 }, ...);
-```
+``` 
 
-Example 2:
+Another example:
+
 ```php
 $monad = Collection::make([
     function($value): int { return (int)$value; }
@@ -160,7 +156,7 @@ $monad = Collection::make([
 
 $monad->map->array_filter(["some", "23"], _)->filter()->toArray(); // [23]
 
-// What's going on inside
+// What's going on inside?
 // 1) "some" casts to int 0, "23" casts to int 23
 // 2) Applying `->filter()` to each element (Excluding an "empty" data)
 ```
@@ -168,14 +164,14 @@ $monad->map->array_filter(["some", "23"], _)->filter()->toArray(); // [23]
 ## Roadmap
 
 - Repositories:
-    - [*] `Serafim\Hydrogen\Repository\DatabaseRepository` - Repository with work on the database.
-    - [*] `Serafim\Hydrogen\Repository\MemoryRepository` - Repository with work on the iterable in-memory data.
-    - [*] `Serafim\Hydrogen\Repository\JsonFileRepository` - Repository with work on the json file.
-    - [*] `Serafim\Hydrogen\Repository\PhpFileRepository` - Repository with work on the php file.
+    - [x] `Serafim\Hydrogen\Repository\DatabaseRepository` - Repository with work on the database.
+    - [x] `Serafim\Hydrogen\Repository\MemoryRepository` - Repository with work on the iterable in-memory data.
+    - [x] `Serafim\Hydrogen\Repository\JsonFileRepository` - Repository with work on the json file.
+    - [x] `Serafim\Hydrogen\Repository\PhpFileRepository` - Repository with work on the php file.
     - Add "scopes" support
 - Collections:
-    - [*] `*::findAll(): array` updated to `*::findAll(): Collection` 
-    - [*] `*::findBy(...): array` updated to `*::findBy(...): Collection`
+    - [x] `*::findAll(): array` updated to `*::findAll(): Collection` 
+    - [x] `*::findBy(...): array` updated to `*::findBy(...): Collection`
     - [ ] Update `@OneToMany` relation from `ArrayCollection` to `Collection`
     - [ ] Update `@ManyToMany` relation from `ArrayCollection` to `Collection`
 - Optimizations of N+1 and greedy (eager) loading:
