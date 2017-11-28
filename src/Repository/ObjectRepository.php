@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Repository;
 
-use Serafim\Hydrogen\Collection\Collection;
 use Serafim\Hydrogen\Query;
+use Serafim\Hydrogen\Collection;
 
 /**
  * Interface ObjectRepository
