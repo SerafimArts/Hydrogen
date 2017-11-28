@@ -24,12 +24,16 @@
     ],
     "require": {
         "php": ">=7.1",
-        "doctrine/orm": "~2.5"
+        "doctrine/orm": "~2.5",
+        "illuminate/support": "~5.5"
     },
     "autoload": {
         "psr-4": {
             "Serafim\\Hydrogen\\": "src/"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "require-dev": {
         "phpunit/phpunit": "~6.1"
