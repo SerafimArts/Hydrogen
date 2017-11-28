@@ -170,7 +170,7 @@ $array = Collection::make(...)->map->intval(_, 10)->toArray();
 
 $array = \array_map(function ($item): int {
      return \intval($item, 10);
-                    ^^^^^ - pattern "_" will replaced to each delegated item value.
+     //             ^^^^^ - pattern "_" will replaced to each delegated item value.
 }, ...);
 ```
 
