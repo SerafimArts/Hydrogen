@@ -161,8 +161,8 @@ $monad = Collection::make([
 $monad->map->array_filter(["some", "23"], _)->filter()->toArray(); // [23]
 
 // What's going on inside
-1) "some" casts to int 0, "23" casts to int 23
-2) Applying `->filter()` to each element (Excluding an "empty" data)
+// 1) "some" casts to int 0, "23" casts to int 23
+// 2) Applying `->filter()` to each element (Excluding an "empty" data)
 ```
 
 ## Roadmap
