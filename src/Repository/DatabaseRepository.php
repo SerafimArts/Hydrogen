@@ -16,7 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Serafim\Hydrogen\Collection;
-use Serafim\Hydrogen\Query;
+use Serafim\Hydrogen\Query\Criterion;
 
 /**
  * Class DatabaseRepository
@@ -56,19 +56,19 @@ abstract class DatabaseRepository implements ObjectRepository
     }
 
     /**
-     * @param Query $query
+     * @param Criterion $query
      * @return null|object
      */
-    public function findOneBy(Query $query)
+    public function findOneBy(Criterion $query)
     {
         return $this->original->findOneBy(...$query->toArray());
     }
 
     /**
-     * @param Query $query
+     * @param Criterion $query
      * @return Collection
      */
-    public function findBy(Query $query): Collection
+    public function findBy(Criterion $query): Collection
     {
         $result = $this->original->findBy(...$query->toArray());
 

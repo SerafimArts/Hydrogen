@@ -8,170 +8,52 @@
 declare(strict_types=1);
 
 namespace Serafim\Hydrogen;
-use Illuminate\Contracts\Support\Arrayable;
+
+use Serafim\Hydrogen\Query\Criterion;
 
 /**
  * Class Query
+ *
+ * @method static Criterion where(string $field, $value)
+ * @method static Criterion orderBy(string $field, string $order = Criterion::ORDER_ASC)
+ * @method static Criterion take(?int $limit)
+ * @method static Criterion skip(?int $offset)
  */
-class Query implements Arrayable
+class Query
 {
-    public const ORDER_ASC  = 'ASC';
-    public const ORDER_DESC = 'DESC';
-
     /**
-     * @var array
+     * @return void
+     * @throws \LogicException
      */
-    private $criteria = [];
-
-    /**
-     * @var null|int
-     */
-    private $limit;
-
-    /**
-     * @var null|int
-     */
-    private $offset;
-
-    /**
-     * @var array|string[]
-     */
-    private $orderBy = [];
-
-    /**
-     * @return static
-     */
-    public static function new(): self
+    private function __clone()
     {
-        return new static();
+        throw new \LogicException(__METHOD__ . ' is private');
     }
 
     /**
-     * @param string $field
-     * @param mixed $value
-     * @return Query
+     * Criterion constructor.
+     * @throws \LogicException
      */
-    public function where(string $field, $value): self
+    private function __construct()
     {
-        $this->criteria[$field] = $value;
-
-        return $this;
+        throw new \LogicException(__METHOD__ . ' is private');
     }
 
     /**
-     * @param string $field
-     * @param string $order
-     * @return Query
+     * @return Criterion
      */
-    public function orderBy(string $field, string $order = self::ORDER_ASC): self
+    public static function new(): Criterion
     {
-        $this->orderBy[$field] = $order;
-
-        return $this;
+        return new Criterion();
     }
 
     /**
-     * Alias of "limit(...)" method.
-     *
-     * @param int|null $limit
-     * @return Query
+     * @param string $method
+     * @param array $arguments
+     * @return mixed
      */
-    public function take(?int $limit): self
+    public static function __callStatic(string $method, array $arguments = [])
     {
-        return $this->limit($limit);
-    }
-
-    /**
-     * Alias of "offset(...)" method.
-     *
-     * @param int|null $offset
-     * @return Query
-     */
-    public function skip(?int $offset): self
-    {
-        return $this->offset($offset);
-    }
-
-    /**
-     * @param int|null $limit
-     * @return Query
-     */
-    public function limit(?int $limit): self
-    {
-        $this->limit = $limit;
-
-        return $this;
-    }
-
-    /**
-     * @param int|null $offset
-     * @return Query
-     */
-    public function offset(?int $offset): self
-    {
-        $this->offset = $offset;
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getCriteria(): array
-    {
-        return $this->criteria;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getLimit(): ?int
-    {
-        return $this->limit;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasLimit(): bool
-    {
-        return $this->limit !== null;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getOffset(): ?int
-    {
-        return $this->offset;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasOffset(): bool
-    {
-        return $this->offset !== null;
-    }
-
-    /**
-     * @return array|string[]
-     */
-    public function getOrderBy(): array
-    {
-        return $this->orderBy;
-    }
-
-    /**
-     * @return array
-     */
-    public function toArray(): array
-    {
-        return [
-            $this->getCriteria(),
-            $this->getOrderBy(),
-            $this->getLimit(),
-            $this->getOffset()
-        ];
+        return static::new()->$method(...$arguments);
     }
 }

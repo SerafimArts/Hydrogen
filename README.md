@@ -91,7 +91,7 @@ class UsersRepositry extends DatabaseRepository
 
 ///
 
-$em->getRepository(User::class)->findBy(Query::new()->where('login', 'any'))->toArray(); // [User, User, ...]
+$em->getRepository(User::class)->findBy(Query::where('login', 'any'))->toArray(); // [User, User, ...]
 ```
 
 ### MemoryRepository
@@ -114,7 +114,7 @@ class UsersRepositry extends MemoryRepository
 
 ///
 
-$em->getRepository(User::class)->findBy(Query::new()->where('login', 'any'))->toArray(); // [User, User, ...]
+$em->getRepository(User::class)->findBy(Query::where('login', 'any'))->toArray(); // [User, User, ...]
 ```
 
 ### JsonFileRepository and PhpFileRepository
@@ -136,7 +136,7 @@ class UsersRepositry extends PhpFileRepository
 
 ///
 
-$em->getRepository(User::class)->findBy(Query::new()->where('login', 'any'))->toArray(); // [User, User, ...]
+$em->getRepository(User::class)->findBy(Query::where('login', 'any'))->toArray(); // [User, User, ...]
 ```
 
 ## Collections
