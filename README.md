@@ -13,6 +13,15 @@
 This package contains a set of frequently used functions of Doctrine ORM 
 that are optimized for more convenient usage.
 
+And includes additional support:
+- [Repositories](#Repositories)
+- [Collections](#Collections)
+- TODO: Avoiding N+1 in OneToOne relations.
+- TODO: Additional relationships loading control in runtime.
+- TODO: Improved query builder.
+- and others...
+
+
 ## Installation
 
 **Requirements:**
@@ -22,59 +31,22 @@ that are optimized for more convenient usage.
 **Installation:**
 - `composer require serafim/hydrogen`
 
-
-## Roadmap (about)
-
-- Repositories:
-    - `Serafim\Hydrogen\Repository\DatabaseRepository` - Repository with work on the database.
-    - `Serafim\Hydrogen\Repository\MemoryRepository` - Repository with work on the iterable in-memory data.
-    - `Serafim\Hydrogen\Repository\JsonFileRepository` - Repository with work on the json file.
-    - `Serafim\Hydrogen\Repository\PhpFileRepository` - Repository with work on the php file.
-    - **TODO**: Add "scopes" support
-- Collections:
-    - `*::findAll(): array` updated to `*::findAll(): Collection` 
-    - `*::findBy(...): array` updated to `*::findBy(...): Collection`
-    - **TODO**: Update `@OneToMany` relation from `ArrayCollection` to `Collection`
-    - **TODO**: Update `@ManyToMany` relation from `ArrayCollection` to `Collection`
-- Optimizations of N+1 and greedy (eager) loading:
-    - **TODO**: Added `@OneToOne` relation optimisation.
-    - **TODO**: Added `@OneToMany` relation optimisation.
-    - **TODO**: Added `@OneToOne` self-referencing relation optimisation (Required as an analog of Embeddable with Discriminator support).
-    - **TODO**: Greedy control at runtime (Like `Repository::with('relation')->findAll()`)
-- Query Builder Enhancements:
-    - **TODO**: Added `->where(string field, valueOrOperator[, value])` (Like `->where('field', 23)` or `->where('field', '>', 23)`)
-    - **TODO**: Added `->whereBetween(string field, array [a, b])`
-    - **TODO**: Added `->whereNotBetween(string field, array [a, b])`
-    - **TODO**: Added `->whereIn(string field, array values)`
-    - **TODO**: Added `->whereNotIn(string field, array values)`
-    - **TODO**: Added `->whereNull(string field)`
-    - **TODO**: Added `->whereNotNull(string field)`
-    - **TODO**: Added `->orderBy(string field[, string sort = "ASC"])`
-    - **TODO**: Added `->take(?int limit = null)`
-    - **TODO**: Added `->skip(?int offset = null)`
-    - **TODO**: Added `->groupBy(string ...fields)`
-    - **TODO**: Added `->having(string field, valueOrOperator[, value])`
-    - **TODO**: Added `->with(string ...relations)`
-    - **TODO**: Added `->join(string relation, string field, valueOrOperator[, value])`
-    - **TODO**: Added `->leftJoin(string relation, string field, valueOrOperator[, value])`
-    - **TODO**: Added `->crossJoin(string relation)`
-    - **TODO**: Added `->first(): ?object`
-    - **TODO**: Added `->get(): Collection`
-    - **TODO**: Added `->count(): int`
-    - etc...
     
 ## Repositories
 
-In all repositories, method signatures have been changed:
+In all repositories, method signatures has been changed.
 
-- From `find($id)`
-    - To `find($id): ?object`
-- From `findOneBy(array $criteria)`
-    - To `findBy(Query $query): ?object`
-- From `findAll()`
-    - To `findAll(): Collection`
-- From `findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)`
-    - To `findBy(Query $query): Collection`
+### ObjectRepository
+
+```php
+interface ObjectRepository
+{
+    public function find($id): ?object;
+    public function findAll(): Collection;
+    public function findOneBy(QueryInterface $query): ?object;
+    public function findBy(QueryInterface $query): Collection;
+}
+```
 
 ### DatabaseRepository
 
@@ -91,7 +63,9 @@ class UsersRepositry extends DatabaseRepository
 
 ///
 
-$em->getRepository(User::class)->findBy(Query::where('login', 'any'))->toArray(); // [User, User, ...]
+$em->getRepository(User::class)
+    ->findBy(Query::where('login', 'example'))
+    ->toArray();
 ```
 
 ### MemoryRepository
@@ -114,7 +88,9 @@ class UsersRepositry extends MemoryRepository
 
 ///
 
-$em->getRepository(User::class)->findBy(Query::where('login', 'any'))->toArray(); // [User, User, ...]
+$em->getRepository(User::class)
+    ->findBy(Query::where('login', 'example'))
+    ->toArray();
 ```
 
 ### JsonFileRepository and PhpFileRepository
@@ -136,7 +112,9 @@ class UsersRepositry extends PhpFileRepository
 
 ///
 
-$em->getRepository(User::class)->findBy(Query::where('login', 'any'))->toArray(); // [User, User, ...]
+$em->getRepository(User::class)
+    ->findBy(Query::where('login', 'example'))
+    ->toArray();
 ```
 
 ## Collections
@@ -186,3 +164,42 @@ $monad->map->array_filter(["some", "23"], _)->filter()->toArray(); // [23]
 1) "some" casts to int 0, "23" casts to int 23
 2) Applying `->filter()` to each element (Excluding an "empty" data)
 ```
+
+## Roadmap
+
+- Repositories:
+    - [*] `Serafim\Hydrogen\Repository\DatabaseRepository` - Repository with work on the database.
+    - [*] `Serafim\Hydrogen\Repository\MemoryRepository` - Repository with work on the iterable in-memory data.
+    - [*] `Serafim\Hydrogen\Repository\JsonFileRepository` - Repository with work on the json file.
+    - [*] `Serafim\Hydrogen\Repository\PhpFileRepository` - Repository with work on the php file.
+    - Add "scopes" support
+- Collections:
+    - [*] `*::findAll(): array` updated to `*::findAll(): Collection` 
+    - [*] `*::findBy(...): array` updated to `*::findBy(...): Collection`
+    - [ ] Update `@OneToMany` relation from `ArrayCollection` to `Collection`
+    - [ ] Update `@ManyToMany` relation from `ArrayCollection` to `Collection`
+- Optimizations of N+1 and greedy (eager) loading:
+    - [ ] Avoid `@OneToOne` relation N+1.
+    - [ ] Avoid `@OneToOne` self-referencing relation N+1 (Required as an analog of Embeddable with Discriminator support).
+    - [ ] Greedy control at runtime (Like `Repository::with('relation')->findAll()`).
+    - [ ] Add Discriminator support into Embeddable type.
+- Query Builder Enhancements:
+    - [ ] Add `->where(string field, valueOrOperator[, value])` (Like `->where('field', 23)` or `->where('field', '>', 23)`)
+    - [ ] Add `->whereBetween(string field, array [a, b])`
+    - [ ] Add `->whereNotBetween(string field, array [a, b])`
+    - [ ] Add `->whereIn(string field, array values)`
+    - [ ] Add `->whereNotIn(string field, array values)`
+    - [ ] Add `->whereNull(string field)`
+    - [ ] Add `->whereNotNull(string field)`
+    - [ ] Add `->orderBy(string field[, string sort = "ASC"])`
+    - [ ] Add `->take(?int limit = null)`
+    - [ ] Add `->skip(?int offset = null)`
+    - [ ] Add `->groupBy(string ...fields)`
+    - [ ] Add `->having(string field, valueOrOperator[, value])`
+    - [ ] Add `->with(string ...relations)`
+    - [ ] Add `->join(string relation, string field, valueOrOperator[, value])`
+    - [ ] Add `->leftJoin(string relation, string field, valueOrOperator[, value])`
+    - [ ] Add `->crossJoin(string relation)`
+    - [ ] Add `->first(): ?object`
+    - [ ] Add `->get(): Collection`
+    - [ ] Add `->count(): int`
