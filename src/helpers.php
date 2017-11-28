@@ -12,7 +12,7 @@ declare(strict_types=1);
  * the function arguments in the high-order messaging.
  *
  * <code>
- *  $array = Collection::new(...)->map->intval(_, 10)->toArray();
+ *  $array = Collection::make(...)->map->intval(_, 10)->toArray();
  *
  *  // Is similar with:
  *
@@ -23,5 +23,5 @@ declare(strict_types=1);
  * </code>
  */
 if (! \defined('_')) {
-    \define('_', \Serafim\Hydrogen\Collection\HighOrderCollectionProxy::PATTERN);
+    \define('_', \Serafim\Hydrogen\Collection\HigherOrderCollectionProxy::PATTERN);
 }

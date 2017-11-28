@@ -15,7 +15,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Serafim\Hydrogen\Collection\Collection;
+use Serafim\Hydrogen\Collection;
 use Serafim\Hydrogen\Query;
 
 /**

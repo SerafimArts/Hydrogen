@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Collection;
 
+use Serafim\Hydrogen\Collection;
+
 /**
  * Class HigherOrderCollectionProxy
  */

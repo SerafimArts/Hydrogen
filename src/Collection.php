@@ -7,10 +7,10 @@
  */
 declare(strict_types=1);
 
-namespace Serafim\Hydrogen\Collection;
+namespace Serafim\Hydrogen;
 
 use Illuminate\Support\Collection as BaseCollection;
-
+use Serafim\Hydrogen\Collection\HigherOrderCollectionProxy;
 
 /**
  * Proxies autocomplete.
