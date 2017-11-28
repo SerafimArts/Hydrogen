@@ -9,11 +9,12 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Repository;
 
+use Doctrine\Common\Persistence\Mapping\ClassMetadata as ClassMetadataInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Serafim\Hydrogen\Collection\Collection;
-use Doctrine\Common\Persistence\Mapping\ClassMetadata as ClassMetadataInterface;
+use Serafim\Hydrogen\Collection;
 use Serafim\Hydrogen\Query;
+use Serafim\Hydrogen\Query\QueryInterface;
 
 /**
  * Class MemoryRepository
@@ -48,19 +49,19 @@ abstract class MemoryRepository implements ObjectRepository
     }
 
     /**
-     * @param Query $query
+     * @param QueryInterface $query
      * @return object|null
      */
-    public function findOneBy(Query $query)
+    public function findOneBy(QueryInterface $query)
     {
         return $this->findBy($query)->first();
     }
 
     /**
-     * @param Query $query
+     * @param QueryInterface $query
      * @return Collection
      */
-    public function findBy(Query $query): Collection
+    public function findBy(QueryInterface $query): Collection
     {
         $collection = $this->findAll();
 
@@ -71,7 +72,7 @@ abstract class MemoryRepository implements ObjectRepository
         }
 
         foreach ($query->getOrderBy() as $field => $order) {
-            $sort = $order === Query::ORDER_ASC ? \SORT_ASC : \SORT_DESC;
+            $sort = $order === QueryInterface::ORDER_ASC ? \SORT_ASC : \SORT_DESC;
 
             $collection = $collection->sortBy(function ($a, $b) use ($field): int {
                 return $this->meta->getFieldValue($a, $field) <=> $this->meta->getFieldValue($b, $field);

@@ -16,7 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Serafim\Hydrogen\Collection;
-use Serafim\Hydrogen\Query\Criterion;
+use Serafim\Hydrogen\Query\QueryInterface;
 
 /**
  * Class DatabaseRepository
@@ -56,21 +56,21 @@ abstract class DatabaseRepository implements ObjectRepository
     }
 
     /**
-     * @param Criterion $query
+     * @param QueryInterface $query
      * @return null|object
      */
-    public function findOneBy(Criterion $query)
+    public function findOneBy(QueryInterface $query)
     {
-        return $this->original->findOneBy(...$query->toArray());
+        return $this->original->findOneBy(...$this->queryToArray($query));
     }
 
     /**
-     * @param Criterion $query
+     * @param QueryInterface $query
      * @return Collection
      */
-    public function findBy(Criterion $query): Collection
+    public function findBy(QueryInterface $query): Collection
     {
-        $result = $this->original->findBy(...$query->toArray());
+        $result = $this->original->findBy(...$this->queryToArray($query));
 
         return new Collection($result);
     }
@@ -81,5 +81,19 @@ abstract class DatabaseRepository implements ObjectRepository
     public function getClassName(): string
     {
         return $this->original->getClassName();
+    }
+
+    /**
+     * @param QueryInterface $query
+     * @return array
+     */
+    private function queryToArray(QueryInterface $query): array
+    {
+        return [
+            $query->getCriteria(),
+            $query->getOrderBy(),
+            $query->getLimit(),
+            $query->getOffset()
+        ];
     }
 }

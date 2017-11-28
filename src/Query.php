@@ -9,15 +9,16 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen;
 
-use Serafim\Hydrogen\Query\Criterion;
+use Serafim\Hydrogen\Query\QueryInterface;
+use Serafim\Hydrogen\Query\RawQuery;
 
 /**
  * Class Query
  *
- * @method static Criterion where(string $field, $value)
- * @method static Criterion orderBy(string $field, string $order = Criterion::ORDER_ASC)
- * @method static Criterion take(?int $limit)
- * @method static Criterion skip(?int $offset)
+ * @method static RawQuery|QueryInterface where(string $field, $value)
+ * @method static RawQuery|QueryInterface orderBy(string $field, string $order = QueryInterface::ORDER_ASC)
+ * @method static RawQuery|QueryInterface take(?int $limit)
+ * @method static RawQuery|QueryInterface skip(?int $offset)
  */
 class Query
 {
@@ -40,11 +41,11 @@ class Query
     }
 
     /**
-     * @return Criterion
+     * @return RawQuery|QueryInterface
      */
-    public static function new(): Criterion
+    public static function new(): QueryInterface
     {
-        return new Criterion();
+        return new RawQuery();
     }
 
     /**

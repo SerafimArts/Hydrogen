@@ -9,16 +9,11 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Query;
 
-use Illuminate\Contracts\Support\Arrayable;
-
 /**
- * Class Query
+ * Class RawQuery
  */
-class Criterion implements Arrayable
+class RawQuery implements QueryInterface
 {
-    public const ORDER_ASC  = 'ASC';
-    public const ORDER_DESC = 'DESC';
-
     /**
      * @var array
      */
@@ -42,9 +37,9 @@ class Criterion implements Arrayable
     /**
      * @param string $field
      * @param mixed $value
-     * @return Builder
+     * @return RawQuery|QueryInterface|$this
      */
-    public function where(string $field, $value): self
+    public function where(string $field, $value): QueryInterface
     {
         $this->criteria[$field] = $value;
 
@@ -54,9 +49,9 @@ class Criterion implements Arrayable
     /**
      * @param string $field
      * @param string $order
-     * @return Builder
+     * @return RawQuery|QueryInterface|$this
      */
-    public function orderBy(string $field, string $order = self::ORDER_ASC): self
+    public function orderBy(string $field, string $order = self::ORDER_ASC): QueryInterface
     {
         $this->orderBy[$field] = $order;
 
@@ -67,9 +62,9 @@ class Criterion implements Arrayable
      * Alias of "limit(...)" method.
      *
      * @param int|null $limit
-     * @return Builder
+     * @return RawQuery|QueryInterface|$this
      */
-    public function take(?int $limit): self
+    public function take(?int $limit): QueryInterface
     {
         return $this->limit($limit);
     }
@@ -78,16 +73,16 @@ class Criterion implements Arrayable
      * Alias of "offset(...)" method.
      *
      * @param int|null $offset
-     * @return Builder
+     * @return RawQuery|QueryInterface|$this
      */
-    public function skip(?int $offset): self
+    public function skip(?int $offset): QueryInterface
     {
         return $this->offset($offset);
     }
 
     /**
      * @param int|null $limit
-     * @return Builder
+     * @return RawQuery|QueryInterface|$this
      */
     public function limit(?int $limit): self
     {
@@ -98,7 +93,7 @@ class Criterion implements Arrayable
 
     /**
      * @param int|null $offset
-     * @return Builder
+     * @return RawQuery|QueryInterface|$this
      */
     public function offset(?int $offset): self
     {
@@ -153,18 +148,5 @@ class Criterion implements Arrayable
     public function getOrderBy(): array
     {
         return $this->orderBy;
-    }
-
-    /**
-     * @return array
-     */
-    public function toArray(): array
-    {
-        return [
-            $this->getCriteria(),
-            $this->getOrderBy(),
-            $this->getLimit(),
-            $this->getOffset()
-        ];
     }
 }
