@@ -13,8 +13,9 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata as ClassMetadataInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Serafim\Hydrogen\Collection;
-use Serafim\Hydrogen\Query;
-use Serafim\Hydrogen\Query\QueryInterface;
+use Serafim\Hydrogen\Query\Builder;
+use Serafim\Hydrogen\Query\Processors\CollectionProcessor;
+use Serafim\Hydrogen\Query\Processors\Processor;
 
 /**
  * Class MemoryRepository
@@ -27,6 +28,11 @@ abstract class MemoryRepository implements ObjectRepository
     private $meta;
 
     /**
+     * @var EntityManagerInterface
+     */
+    private $em;
+
+    /**
      * ArrayRepository constructor.
      * @param EntityManagerInterface $em
      * @param ClassMetadata $meta
@@ -34,74 +40,78 @@ abstract class MemoryRepository implements ObjectRepository
     public function __construct(EntityManagerInterface $em, ClassMetadata $meta)
     {
         $this->meta = $meta;
+        $this->em   = $em;
     }
 
     /**
-     * @param mixed $id
-     * @return object|null
+     * @param int|string $id
+     * @return null|object
      * @throws \LogicException
      */
     public function find($id)
     {
-        $criterion = Query::new()->where(\array_first($this->meta->getIdentifier()), $id);
+        $primary = \array_first($this->meta->getIdentifierFieldNames());
 
-        return $this->findOneBy($criterion);
+        $query = (new Builder())->where($primary, $id);
+
+        return $this->process()->first($query);
     }
 
     /**
-     * @param QueryInterface $query
-     * @return object|null
+     * @return Processor
      */
-    public function findOneBy(QueryInterface $query)
+    protected function process(): Processor
     {
-        return $this->findBy($query)->first();
-    }
-
-    /**
-     * @param QueryInterface $query
-     * @return Collection
-     */
-    public function findBy(QueryInterface $query): Collection
-    {
-        $collection = $this->findAll();
-
-        foreach ($query->getCriteria() as $key => $value) {
-            $collection = $collection->filter(function ($entity) use ($key, $value): bool {
-                return $this->meta->getFieldValue($entity, $key) === $value;
-            });
-        }
-
-        foreach ($query->getOrderBy() as $field => $order) {
-            $sort = $order === QueryInterface::ORDER_ASC ? \SORT_ASC : \SORT_DESC;
-
-            $collection = $collection->sortBy(function ($a, $b) use ($field): int {
-                return $this->meta->getFieldValue($a, $field) <=> $this->meta->getFieldValue($b, $field);
-            }, $sort);
-        }
-
-        switch (true) {
-            case $query->hasOffset():
-                return $collection->slice($query->getOffset(), $query->getLimit());
-
-            case $query->hasLimit():
-                return $collection->take($query->getLimit());
-        }
-
-        return $collection;
-    }
-
-    /**
-     * @return Collection
-     */
-    public function findAll(): Collection
-    {
-        return new Collection($this->getData());
+        return new CollectionProcessor(new Collection($this->getData()), $this->em, $this->meta);
     }
 
     /**
      * @return iterable|object[]
      */
     abstract protected function getData(): iterable;
+
+    /**
+     * @return Collection
+     */
+    public function findAll(): Collection
+    {
+        return $this->process()->get(new Builder());
+    }
+
+    /**
+     * @param Builder $query
+     * @return null|object
+     */
+    public function findOneBy(Builder $query)
+    {
+        return $this->process()->first($query);
+    }
+
+    /**
+     * @param Builder $query
+     * @return Collection
+     */
+    public function findBy(Builder $query): Collection
+    {
+        return $this->process()->get($query);
+    }
+
+    /**
+     * @param Builder $query
+     * @return int
+     */
+    public function count(Builder $query): int
+    {
+        return $this->process()->count($query);
+    }
+
+    /**
+     * @return Builder
+     */
+    public function query(): Builder
+    {
+        return new Builder();
+    }
 
     /**
      * @return string

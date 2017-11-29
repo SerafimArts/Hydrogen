@@ -13,15 +13,6 @@
 This package contains a set of frequently used functions of Doctrine ORM 
 that are optimized for more convenient usage.
 
-And includes additional support:
-- [Repositories](#Repositories)
-- [Collections](#Collections)
-- TODO: Avoiding N+1 in OneToOne relations.
-- TODO: Additional relationships loading control in runtime.
-- TODO: Improved query builder.
-- and others...
-
-
 ## Installation
 
 **Requirements:**
@@ -31,91 +22,156 @@ And includes additional support:
 **Installation:**
 - `composer require serafim/hydrogen`
 
-    
-## Repositories
+## Queries
 
-In all repositories, method signatures has been changed.
-
-### ObjectRepository
+The Query object is created in the format `Query::method()->method()->method()->...` 
+and has a set of the following methods. 
 
 ```php
+Query::new()
+    ->where('field', 23)                // WHERE field = 23
+    ->where('field', '>', 42)           // WHERE field > 42
+    ->whereIn('field', [1, 2, 3])       // WHERE field IN (1, 2, 3)
+    ->where('field', [1, 2, 3])         // (alias) WHERE field IN (1, 2, 3)
+    ->whereNotIn('field', [1, 2, 3])    // WHERE field NOT IN (1, 2, 3)
+    ->whereBetween('field', 1, 2)       // WHERE field BETWEEN 1 AND 2
+    ->whereNotBetween('field', 1, 2)    // WHERE field NOT BETWEEN 1 AND 2
+    ->whereNull('field')                // WHERE field IS NULL
+    ->whereNotNull('field')             // WHERE field IS NOT NULL
+    ->orderBy('field', 'asc')           // ORDER BY field ASC
+    ->asc('field')                      // (alias) ORDER BY field ASC
+    ->desc('field')                     // (alias) ORDER BY field DESC
+    ->latest('createdAt')               // (alias) ORDER BY createdAt DESC
+    ->oldest('createdAt')               // (alias) ORDER BY createdAt ASC
+    ->groupBy('field')                  // GROUP BY field
+    ->limit(10)                         // LIMIT 10
+    ->take(10)                          // (alias) LIMIT 10
+    ->skip(10)                          // OFFSET 10
+    ->offset(10)                        // (alias) OFFSET 10
+    ->range(100, 150)                   // LIMIT 50 OFFSET 100
+    ->with('relation')                  // Relation "relation" eager loading 
+```
+
+## Repositories
+
+
+
+The interface signature has been improved and now contains the following methods.
+
+```php
+use Serafim\Hydrogen\Builder;
+use Serafim\Hydrogen\Collection;
+
 interface ObjectRepository
 {
     public function find($id): ?object;
+    
     public function findAll(): Collection;
-    public function findOneBy(QueryInterface $query): ?object;
-    public function findBy(QueryInterface $query): Collection;
+    
+    public function findOneBy(Builder $query): ?object;
+    
+    public function findBy(Builder $query): Collection;
+    
+    public function count(Builder $query): int;
+    
+    public function query(): Builder;
 }
+```
+
+In addition, basic repositories for different types 
+of data sources have been added:
+
+- [DatabaseRepository](#DatabaseRepository)
+- [MemoryRepository](#MemoryRepository)
+- [JsonFileRepository](#JsonFileRepository)
+- [PhpFileRepository](#PhpFileRepository)
+
+### DatabaseRepository
+
+```php
+use Serafim\Hydrogen\DatabaseRepository;
+
+class Example extends DatabaseRepository {}
 ```
 
 ### DatabaseRepository
 
-Creating a simple database repository.
-
-> Note that as a base class it is worth using `DatabaseRepository`.
-
 ```php
-use Serafim\Hydrogen\Repository\DatabaseRepository;
+use Serafim\Hydrogen\MemoryRepository;
 
-class UsersRepositry extends DatabaseRepository 
-{
-}
-
-///
-
-$em->getRepository(User::class)
-    ->findBy(Query::where('login', 'example'))
-    ->toArray();
-```
-
-### MemoryRepository
-
-Creating a simple in-memory repository.
-
-> Note that as a base class it is worth using `MemoryRepository`.
-
-```php
-use Serafim\Hydrogen\Repository\MemoryRepository;
-
-class UsersRepositry extends MemoryRepository 
+class Examples extends MemoryRepository 
 {
     protected function getData(): iterable
     {
-        yield new User(...);
-        yield new User(...);
+        yield ['id' => 23, 'created_at' => '2017-11-29 00:03:22'];
+        yield ['id' => 42, 'created_at' => '2017-11-29 01:23:22'];
     }
 }
 
-///
 
-$em->getRepository(User::class)
-    ->findBy(Query::where('login', 'example'))
-    ->toArray();
+/**
+ * @ORM\Entity(repositoryClass=Examples::class)
+ */
+class Example
+{
+    /**
+     * @var int
+     * @ORM\Id()
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(name="id", type="integer")
+     */
+    private $id;
+    
+    /**
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+}
 ```
 
-### JsonFileRepository and PhpFileRepository
-
-Creating a simple file repository.
-
-> Note that as a base class it is worth using `JsonFileRepository` or `PhpFileRepository`.
+### JsonFileRepository
 
 ```php
-use Serafim\Hydrogen\Repository\PhpFileRepository;
+use Serafim\Hydrogen\JsonFileRepository;
 
-class UsersRepositry extends PhpFileRepository 
+class Examples extends JsonFileRepository 
 {
-    public function getFilePath(): string
+    protected function getFilePath(): string
     {
-        return __DIR__ . '/path/to/file.php'; // or json
+        return __DIR__ . '/path/to/file.json';
     }
 }
 
-///
-
-$em->getRepository(User::class)
-    ->findBy(Query::where('login', 'example'))
-    ->toArray();
+// ...
 ```
+
+### PhpFileRepository
+
+```php
+use Serafim\Hydrogen\JsonFileRepository;
+
+class Examples extends PhpFileRepository 
+{
+    protected function getFilePath(): string
+    {
+        return __DIR__ . '/path/to/file.php';
+    }
+}
+
+// ...
+```
+
+## "In-place" queries
+
+You can make queries on the spot using these repositories as a data source =)
+
+```php
+$repository = $em->getRepository(EntityClass::class);
+
+Query::from($repository)
+    ->where('id', 23)
+    ->get(); // Collection { EntityClass, EntityClass }
+``` 
 
 ## Collections
 
@@ -128,74 +184,84 @@ some new features have been added:
  
 ### Higher Order Messaging
 
-
 Pattern "`_`" is used to specify the location of the delegate in
-the function arguments in the higher-order messaging.
+the function arguments in the higher-order messaging while using global functions.
 
 ```php
 use Serafim\Hydrogen\Collection;
 
-Collection::make(['23', '42', 'some'])
-    ->map->intval(_)
-    ->toArray(); // [23, 42, 0]
+$data = [
+    ['value' => '23'],
+    ['value' => '42'],
+    ['value' => 'Hello!'],
+];
+
+
+$example1 = Collection::make($data)
+    ->map->value // ['23', '42', 'Hello!']
+    ->toArray();
     
-// Is similar with:
+//
+// $example1 = \array_map(function (array $item): string {
+//      return $item['value']; 
+// }, $data);
+//
 
-$array = \array_map(function ($item): int {
-     return \intval($item, 10);
-     //             ^^^^^ - pattern "_" will replaced to each delegated item value.
-}, ...);
-``` 
+$example2 = Collection::make($data)
+    ->map->value     // ['23', '42', 'Hello!']
+    ->map->intval(_) // [23, 42, 0]
+    ->filter()       // [23, 42]
+    ->toArray();
+    
+//
+//
+// $example2 = \array_map(function (array $item): string {
+//      return $item['value']; 
+// }, $data);
+//
+// $example2 = \array_map(function (string $value): int {
+//      return \intval($value);
+//                      ^^^^^ - pattern "_" will replaced to each delegated item value. 
+// }, $example1);
+//
+// $example2 = \array_filter($example2, function(int $value): bool {
+//      return (bool)$value;
+// });
+//
+//
 
-Another example:
-
-```php
-$monad = Collection::make([
-    function($value): int { return (int)$value; }
-]);
-
-$monad->map->array_filter(["some", "23"], _)->filter()->toArray(); // [23]
-
-// What's going on inside?
-// 1) "some" casts to int 0, "23" casts to int 23
-// 2) Applying `->filter()` to each element (Excluding an "empty" data)
+$example3 = Collection::make($data)
+    ->map->value            // ['23', '42', 'Hello!']
+    ->map->mbSubstr(_, 1)   // Using "mb_substr(_, 1)" -> ['3', '2', 'ello!']
+    ->toArray();
 ```
 
-## Roadmap
+### Static constructors
 
-- Repositories:
-    - [x] `Serafim\Hydrogen\Repository\DatabaseRepository` - Repository with work on the database.
-    - [x] `Serafim\Hydrogen\Repository\MemoryRepository` - Repository with work on the iterable in-memory data.
-    - [x] `Serafim\Hydrogen\Repository\JsonFileRepository` - Repository with work on the json file.
-    - [x] `Serafim\Hydrogen\Repository\PhpFileRepository` - Repository with work on the php file.
-    - Add "scopes" support
-- Collections:
-    - [x] `*::findAll(): array` updated to `*::findAll(): Collection` 
-    - [x] `*::findBy(...): array` updated to `*::findBy(...): Collection`
-    - [ ] Update `@OneToMany` relation from `ArrayCollection` to `Collection`
-    - [ ] Update `@ManyToMany` relation from `ArrayCollection` to `Collection`
-- Optimizations of N+1 and greedy (eager) loading:
-    - [ ] Avoid `@OneToOne` relation N+1.
-    - [ ] Avoid `@OneToOne` self-referencing relation N+1 (Required as an analog of Embeddable with Discriminator support).
-    - [ ] Greedy control at runtime (Like `Repository::with('relation')->findAll()`).
-    - [ ] Add Discriminator support into Embeddable type.
-- Query Builder Enhancements:
-    - [ ] Add `->where(string field, valueOrOperator[, value])` (Like `->where('field', 23)` or `->where('field', '>', 23)`)
-    - [ ] Add `->whereBetween(string field, array [a, b])`
-    - [ ] Add `->whereNotBetween(string field, array [a, b])`
-    - [ ] Add `->whereIn(string field, array values)`
-    - [ ] Add `->whereNotIn(string field, array values)`
-    - [ ] Add `->whereNull(string field)`
-    - [ ] Add `->whereNotNull(string field)`
-    - [ ] Add `->orderBy(string field[, string sort = "ASC"])`
-    - [ ] Add `->take(?int limit = null)`
-    - [ ] Add `->skip(?int offset = null)`
-    - [ ] Add `->groupBy(string ...fields)`
-    - [ ] Add `->having(string field, valueOrOperator[, value])`
-    - [ ] Add `->with(string ...relations)`
-    - [ ] Add `->join(string relation, string field, valueOrOperator[, value])`
-    - [ ] Add `->leftJoin(string relation, string field, valueOrOperator[, value])`
-    - [ ] Add `->crossJoin(string relation)`
-    - [ ] Add `->first(): ?object`
-    - [ ] Add `->get(): Collection`
-    - [ ] Add `->count(): int`
+```php
+use Serafim\Hydrogen\Query;
+use Serafim\Hydrogen\Collection;
+
+$collection = Collection(...);
+// Is alias of "new Collection(...)" or "Collection::make(...)"
+```
+
+### Partial destructuring
+
+```php
+use Serafim\Hydrogen\Collection;
+
+$collection = Collection::make([
+    ['a' => 'A1', 'b' => 'B1' 'value' => '23'],
+    ['a' => 'A2', 'b' => 'B2' 'value' => '42'],
+    ['a' => 'A3', 'b' => 'B3' 'value' => 'Hello!'],
+]);
+
+foreach($collection as $item) {
+    \var_dump($item); // [a => 'A*', b => 'B*', value => '***'] 
+}
+
+foreach ($collection as ['a' => $a]) {
+    \var_dump($a); // 'A'
+}
+```

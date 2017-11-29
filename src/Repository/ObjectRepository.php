@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Repository;
 
-use Serafim\Hydrogen\Query\QueryInterface;
 use Serafim\Hydrogen\Collection;
+use Serafim\Hydrogen\Query\Builder;
 
 /**
  * Interface ObjectRepository
@@ -35,10 +35,10 @@ interface ObjectRepository
     /**
      * Finds a single object by a set of criteria.
      *
-     * @param QueryInterface $query
+     * @param Builder $query
      * @return null|object
      */
-    public function findOneBy(QueryInterface $query);
+    public function findOneBy(Builder $query);
 
     /**
      * Finds objects by a set of criteria.
@@ -47,13 +47,24 @@ interface ObjectRepository
      * an UnexpectedValueException if certain values of the sorting or limiting details are
      * not supported.
      *
-     * @param QueryInterface $query
+     * @param Builder $query
      * @return Collection|object[]
      */
-    public function findBy(QueryInterface $query): Collection;
+    public function findBy(Builder $query): Collection;
+
+    /**
+     * @param Builder $query
+     * @return int
+     */
+    public function count(Builder $query): int;
 
     /**
      * @return string
      */
     public function getClassName(): string;
+
+    /**
+     * @return Builder
+     */
+    public function query(): Builder;
 }

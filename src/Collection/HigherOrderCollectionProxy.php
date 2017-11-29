@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Collection;
 
+use Illuminate\Support\Str;
 use Serafim\Hydrogen\Collection;
 
 /**
@@ -58,8 +59,18 @@ class HigherOrderCollectionProxy
                 return $item[$property];
             }
 
+            if ($this->hasMethod($item, $property)) {
+                return $item->$property();
+            }
+
             if (\function_exists($property)) {
                 return $property($item);
+            }
+
+            $snake = Str::snake($property);
+
+            if (\function_exists($snake)) {
+                return $snake($item);
             }
 
             return null;
@@ -90,6 +101,11 @@ class HigherOrderCollectionProxy
                 return $method(...$this->pack($item, $arguments));
             }
 
+            $snake = Str::snake($method);
+            if (\function_exists(Str::snake($snake))) {
+                return $snake(...$this->pack($item, $arguments));
+            }
+
             return null;
         });
     }
@@ -110,8 +126,7 @@ class HigherOrderCollectionProxy
      */
     private function hasCallableKey($context, string $key): bool
     {
-        return $this->isArrayable($context) &&
-            \is_callable($context[$key] ?? null);
+        return $this->isArrayable($context) && \is_callable($context[$key] ?? null);
     }
 
     /**
@@ -121,7 +136,10 @@ class HigherOrderCollectionProxy
      */
     private function hasProperty($context, string $property): bool
     {
-        return \property_exists($context, $property) || \method_exists($context, '__get');
+        return \is_object($context) && (
+            \property_exists($context, $property) ||
+            \method_exists($context, '__get')
+        );
     }
 
     /**
@@ -141,7 +159,10 @@ class HigherOrderCollectionProxy
      */
     private function hasMethod($context, string $method): bool
     {
-        return \method_exists($context, $method) || \method_exists($context, '__call');
+        return \is_object($context) && (
+            \method_exists($context, $method) ||
+            \method_exists($context, '__call')
+        );
     }
 
     /**
