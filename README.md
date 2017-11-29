@@ -54,13 +54,11 @@ Query::new()
 
 ## Repositories
 
-
-
 The interface signature has been improved and now contains the following methods.
 
 ```php
-use Serafim\Hydrogen\Builder;
 use Serafim\Hydrogen\Collection;
+use Serafim\Hydrogen\Qeury\Builder;
 
 interface ObjectRepository
 {
@@ -161,7 +159,19 @@ class Examples extends PhpFileRepository
 // ...
 ```
 
-## "In-place" queries
+### Selection 
+
+```php
+use Serafim\Hydrogen\Query;
+
+$query = Query::where('id', '>=', 42)->orderBy('id');
+
+$result = $repository->findAll($query);
+
+\var_dump($result->toArray());
+```
+
+### "In-place" queries
 
 You can make queries on the spot using these repositories as a data source =)
 
