@@ -49,7 +49,31 @@ Query::new()
     ->skip(10)                          // OFFSET 10
     ->offset(10)                        // (alias) OFFSET 10
     ->range(100, 150)                   // LIMIT 50 OFFSET 100
-    ->with('relation')                  // Relation "relation" eager loading 
+    ->with('relation')                  // Relation "relation" eager loading
+    
+```
+
+Another example:
+
+```php
+Query::new()
+    ->where('id', '=', 23)
+    ->orWhere('id', '>', 42)
+    ->orWhereIn('id', [1, 3, 5])
+    ->orderBy('createdAt')
+    ->orderBy('updatedAt');
+/**
+ * Result:
+ * "SELECT ... FROM ... WHERE id = 23 OR id > 42 OR id IN (1, 3, 5) ORDER BY created_at ASC, updated_at ASC"
+ */
+ 
+// Alternatively, you can use the following variant:
+
+Query::where('id', 23)
+    ->or->where('id', '>', 42)
+    ->or->where('id', [1, 3, 5])
+    ->asc('createdAt', 'updatedAt');
+ 
 ```
 
 ## Repositories
