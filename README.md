@@ -272,15 +272,17 @@ $example3 = Collection::make($data)
 
 ### Static constructors
 
+You can create collections (and queries) without using the keyword "new". 
+Why do I need it - I do not know, but it looks cool =)
+
 ```php
-use Serafim\Hydrogen\Query;
 use Serafim\Hydrogen\Collection;
 
 $collection = Collection(...);
-// Is alias of "new Collection(...)" or "Collection::make(...)"
+// Is alias of "new Collection(...)"
 ```
 
-### Partial destructuring
+### Destructuring
 
 ```php
 use Serafim\Hydrogen\Collection;
@@ -291,10 +293,12 @@ $collection = Collection::make([
     ['a' => 'A3', 'b' => 'B3' 'value' => 'Hello!'],
 ]);
 
+// Displays all data
 foreach($collection as $item) {
     \var_dump($item); // [a => 'A*', b => 'B*', value => '***'] 
 }
 
+// Displays only "a" field
 foreach ($collection as ['a' => $a]) {
     \var_dump($a); // 'A'
 }
