@@ -94,7 +94,7 @@ use Serafim\Hydrogen\DatabaseRepository;
 class Example extends DatabaseRepository {}
 ```
 
-### DatabaseRepository
+### MemoryRepository
 
 ```php
 use Serafim\Hydrogen\MemoryRepository;
