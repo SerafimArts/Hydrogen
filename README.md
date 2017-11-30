@@ -7,19 +7,38 @@
     <a href="https://packagist.org/packages/serafim/hydrogen"><img src="https://poser.pugx.org/serafim/hydrogen/v/unstable" alt="Latest Unstable Version"></a>
     <a href="https://raw.githubusercontent.com/serafim/hydrogen/master/LICENSE"><img src="https://poser.pugx.org/serafim/hydrogen/license" alt="License MIT"></a>
 </p>
-
+    
+- [Introduction](#introduction)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Queries](#queries)
+    - [Eager loading](#eager-loading)
+- [Repositories](#repositories)
+    - [DatabaseRepository](#databaserepository)
+    - [MemoryRepository](#memoryrepository)
+    - [JsonFileRepository](#jsonfilerepository)
+    - [PhpFileRepository](#phpfilerepository)
+    - [Selections](#selections)
+    - ["In-place" queries](#in-place-queries)
+- [Collections](#collections)
+    - [Higher Order Messaging](#higher-order-messaging)
+    - [Static constructors](#static-constructors)
+    - [Destructuring](#destructuring)
+- [Heuristic algorithms](#heuristic-algorithms)
+    - [WHERE IN](#where-in)
+    
 ## Introduction
 
 This package contains a set of frequently used functions of Doctrine ORM 
 that are optimized for more convenient usage.
 
-## Installation
+## Requirements
 
-**Requirements:**
 - `PHP >= 7.1`
 - `doctrine/orm: ~2.5`
 
-**Installation:**
+## Installation
+
 - `composer require serafim/hydrogen`
 
 ## Queries
@@ -76,7 +95,7 @@ Query::where('id', 23)
  
 ```
 
-## Eager loading
+### Eager loading
 
 Suppose we have the following OneToOne relationship between the parent and child.
 
@@ -159,12 +178,7 @@ interface ObjectRepository
 ```
 
 In addition, basic repositories for different types 
-of data sources have been added:
-
-- [DatabaseRepository](#DatabaseRepository)
-- [MemoryRepository](#MemoryRepository)
-- [JsonFileRepository](#JsonFileRepository)
-- [PhpFileRepository](#PhpFileRepository)
+of data sources have been added.
 
 ### DatabaseRepository
 
@@ -241,7 +255,7 @@ class Examples extends PhpFileRepository
 // ...
 ```
 
-### Selection 
+### Selections
 
 ```php
 use Serafim\Hydrogen\Query;
@@ -364,7 +378,7 @@ foreach ($collection as ['a' => $a]) {
 
 ## Heuristic algorithms
 
-### Where in
+### "WHERE IN" optimisations
 
 This optimization determines how many elements are inside the 
 "`WHERE IN`" the sample, and in the event that the value contains 
