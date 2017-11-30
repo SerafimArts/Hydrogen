@@ -76,6 +76,64 @@ Query::where('id', 23)
  
 ```
 
+## Eager loading
+
+Suppose we have the following OneToOne relationship between the parent and child.
+
+```php
+/** @ORM\Entity */
+class Child
+{
+    /**
+     * @var Parent
+     * @ORM\OneToOne(targetEntity=Parent::class, inversedBy="child")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id")
+     */
+    private $parent;
+}
+
+/** @ORM\Entity */
+class Parent
+{
+    /**
+     * @var Child
+     * @ORM\OneToOne(targetEntity=Child::class, mappedBy="parent")
+     */
+    private $child;
+}
+```
+
+Regardless of how you indicate your relationship, it will hit `N+1`, like this:
+
+```php
+$query = Query::whereIn('id', [1, 2]);
+
+$children->findAll($query);
+
+/**
+ * SELECT ... FROM children d0 WHERE d0.id IN ("1", "2");
+ * SELECT ... FROM parents t0 LEFT JOIN children t3 ON t3.parent_id = t0.id WHERE t0.id = "1";
+ * SELECT ... FROM parents t0 LEFT JOIN children t3 ON t3.parent_id = t0.id WHERE t0.id = "2";
+ */
+```
+
+Now let's try to force this relationship and see what happens:
+
+```php
+$query = Query::whereIn('id', [1, 2])
+    ->with('parent'); // Just add "->with(relationName)" method.
+
+$children->findAll($query);
+
+/**
+ * SELECT ... FROM children d0_ LEFT JOIN parents s1_ ON d0_.parent_id = s1_.id WHERE d0_.id IN ("1", "2");
+ */
+```
+
+Beethooven approves =)
+
+![https://habrastorage.org/webt/lf/hw/dn/lfhwdnvjxlt9vrsbrd_ajpitubc.png](https://habrastorage.org/webt/lf/hw/dn/lfhwdnvjxlt9vrsbrd_ajpitubc.png)
+
 ## Repositories
 
 The interface signature has been improved and now contains the following methods.
