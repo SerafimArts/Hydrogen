@@ -9,10 +9,6 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Query\Criterion;
 
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\QueryBuilder;
-use Serafim\Hydrogen\Collection;
-
 /**
  * Class Offset
  */

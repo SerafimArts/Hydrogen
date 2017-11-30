@@ -12,7 +12,6 @@ namespace Serafim\Hydrogen\Repository;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata as ClassMetadataInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Serafim\Hydrogen\Collection;
 use Serafim\Hydrogen\Query\Builder;
@@ -30,14 +29,9 @@ abstract class DatabaseRepository implements ObjectRepository
     private $meta;
 
     /**
-     * @var EntityRepository
+     * @var Processor|DatabaseProcessor
      */
-    private $repository;
-
-    /**
-     * @var EntityManager|EntityManagerInterface
-     */
-    private $em;
+    private $processor;
 
     /**
      * DatabaseRepository constructor.
@@ -46,9 +40,8 @@ abstract class DatabaseRepository implements ObjectRepository
      */
     public function __construct(EntityManagerInterface $em, ClassMetadata $meta)
     {
-        $this->em = $em;
         $this->meta = $meta;
-        $this->repository = new EntityRepository($em, $meta);
+        $this->processor = new DatabaseProcessor($em, $this->meta);
     }
 
     /**
@@ -62,17 +55,7 @@ abstract class DatabaseRepository implements ObjectRepository
 
         $query = (new Builder())->where($primary, $id);
 
-        return $this->process()->first($query);
-    }
-
-    /**
-     * @param string|null $alias
-     * @return Processor
-     * @throws \Exception
-     */
-    protected function process(string $alias = null): Processor
-    {
-        return new DatabaseProcessor($this->em, $this->meta, $alias);
+        return $this->processor->first($query);
     }
 
     /**
@@ -81,7 +64,17 @@ abstract class DatabaseRepository implements ObjectRepository
      */
     public function findAll(): Collection
     {
-        return new Collection($this->process()->get(new Builder()));
+        return new Collection($this->processor->get(new Builder()));
+    }
+
+    /**
+     * @param Builder $query
+     * @return string
+     * @throws \InvalidArgumentException
+     */
+    public function dql(Builder $query): string
+    {
+        return $this->processor->toDql($query);
     }
 
     /**
@@ -91,7 +84,7 @@ abstract class DatabaseRepository implements ObjectRepository
      */
     public function findOneBy(Builder $query)
     {
-        return $this->process()->first($query);
+        return $this->processor->first($query);
     }
 
     /**
@@ -101,7 +94,7 @@ abstract class DatabaseRepository implements ObjectRepository
      */
     public function findBy(Builder $query): Collection
     {
-        return $this->process()->get($query);
+        return $this->processor->get($query);
     }
 
     /**
@@ -111,7 +104,7 @@ abstract class DatabaseRepository implements ObjectRepository
      */
     public function count(Builder $query): int
     {
-        return $this->process()->count($query);
+        return $this->processor->count($query);
     }
 
     /**
@@ -119,7 +112,7 @@ abstract class DatabaseRepository implements ObjectRepository
      */
     public function getClassName(): string
     {
-        return $this->repository->getClassName();
+        return $this->meta->getName();
     }
 
     /**

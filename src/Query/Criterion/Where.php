@@ -9,12 +9,7 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Query\Criterion;
 
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Query\Expr;
-use Doctrine\ORM\QueryBuilder;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Serafim\Hydrogen\Collection;
 
 /**
  * Class Where

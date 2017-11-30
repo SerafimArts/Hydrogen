@@ -20,6 +20,8 @@ use Serafim\Hydrogen\Query\Criterion\Offset;
 use Serafim\Hydrogen\Query\Criterion\OrderBy;
 use Serafim\Hydrogen\Query\Criterion\Relation;
 use Serafim\Hydrogen\Query\Criterion\Where;
+use Serafim\Hydrogen\Query\Heuristics\Heuristic;
+use Serafim\Hydrogen\Query\Heuristics\WhereIn;
 use Serafim\Hydrogen\Query\Processors\Collection\CriterionProcessor;
 use Serafim\Hydrogen\Query\Processors\Collection\GroupByProcessor;
 use Serafim\Hydrogen\Query\Processors\Collection\LimitProcessor;
@@ -87,7 +89,6 @@ class CollectionProcessor extends BaseProcessor
      * @param Collection $collection
      * @return Collection
      * @throws \LogicException
-     * @throws \Doctrine\ORM\Mapping\MappingException
      */
     private function applyMappings(Collection $collection): Collection
     {
@@ -144,5 +145,15 @@ class CollectionProcessor extends BaseProcessor
     final protected function createProcessor(string $processor): CriterionProcessor
     {
         return new $processor($this->em, $this->meta);
+    }
+
+    /**
+     * @return iterable|string[]|Heuristic[]
+     */
+    final protected function getHeuristics(): iterable
+    {
+        return [
+            WhereIn::class,
+        ];
     }
 }

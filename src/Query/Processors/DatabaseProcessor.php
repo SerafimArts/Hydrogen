@@ -22,6 +22,8 @@ use Serafim\Hydrogen\Query\Criterion\Offset;
 use Serafim\Hydrogen\Query\Criterion\OrderBy;
 use Serafim\Hydrogen\Query\Criterion\Relation;
 use Serafim\Hydrogen\Query\Criterion\Where;
+use Serafim\Hydrogen\Query\Heuristics\Heuristic;
+use Serafim\Hydrogen\Query\Heuristics\WhereIn;
 use Serafim\Hydrogen\Query\Processors\Database\CriterionProcessor;
 use Serafim\Hydrogen\Query\Processors\Database\GroupByProcessor;
 use Serafim\Hydrogen\Query\Processors\Database\LimitProcessor;
@@ -35,6 +37,11 @@ use Serafim\Hydrogen\Query\Processors\Database\WhereProcessor;
  */
 class DatabaseProcessor extends BaseProcessor
 {
+    /**
+     * @var int
+     */
+    private static $lastSelectionId = 0;
+
     /**
      * @var string
      */
@@ -54,19 +61,23 @@ class DatabaseProcessor extends BaseProcessor
      */
     public function __construct(EntityManagerInterface $em, ClassMetadata $meta, string $alias = null)
     {
-        $this->alias = $alias ?? $this->createAlias();
+        $this->alias = $alias ?? $this->createAlias($meta);
         $this->query = $this->bootQuery($this->alias, $em, $meta);
 
         parent::__construct($em, $meta);
     }
 
     /**
+     * @param ClassMetadata $meta
+     * @param string|null $seed
      * @return string
-     * @throws \Exception
      */
-    private function createAlias(): string
+    private function createAlias(ClassMetadata $meta, string $seed = null): string
     {
-        return 'q' . Str::lower(Str::random(4));
+        return \vsprintf('%s_%s', [
+            Str::snake(\class_basename($seed ?? $meta->getName())),
+            ++self::$lastSelectionId
+        ]);
     }
 
     /**
@@ -102,10 +113,21 @@ class DatabaseProcessor extends BaseProcessor
      */
     private function query(Builder $builder): QueryBuilder
     {
+        //
+        // Apply global query optimisations.
+        //
+        $builder = $this->optimiseQuery($builder);
+
+        //
+        // Make sure that the Builder is immutable. Do not touch him.
+        //
         $query = clone $this->query;
 
+        //
+        // Build query
+        //
         foreach ($builder->getCriteria() as $criterion) {
-            $query = $this->getProcessor($criterion)->process($criterion, clone $query);
+            $query = $this->getProcessor($criterion)->process($criterion, $query);
         }
 
         return $query;
@@ -183,6 +205,16 @@ class DatabaseProcessor extends BaseProcessor
             OrderBy::class  => OrderByProcessor::class,
             Relation::class => RelationProcessor::class,
             Where::class    => WhereProcessor::class,
+        ];
+    }
+
+    /**
+     * @return iterable|string[]|Heuristic[]
+     */
+    final protected function getHeuristics(): iterable
+    {
+        return [
+            WhereIn::class,
         ];
     }
 }

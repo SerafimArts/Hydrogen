@@ -38,6 +38,14 @@ class Proxy
     }
 
     /**
+     * @return Builder
+     */
+    public function toBuilder(): Builder
+    {
+        return $this->builder;
+    }
+
+    /**
      * @param string $method
      * @param array $arguments
      * @return $this|Builder|Proxy

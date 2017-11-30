@@ -30,14 +30,22 @@ class Builder
     private $invariants = [];
 
     /**
-     * @var array|Criterion[]
+     * @var \SplObjectStorage|Criterion[]
      */
-    protected $criteria = [];
+    protected $criteria;
 
     /**
      * @var bool
      */
     private $thenOr = false;
+
+    /**
+     * Builder constructor.
+     */
+    public function __construct()
+    {
+        $this->criteria = new \SplObjectStorage();
+    }
 
     /**
      * @return Builder|static|$this
@@ -87,7 +95,7 @@ class Builder
             $this->invariants[] = \get_class($criterion);
         }
 
-        $this->criteria[] = $criterion;
+        $this->criteria->attach($criterion);
 
         return $this;
     }
@@ -362,10 +370,34 @@ class Builder
     }
 
     /**
-     * @return array|Criterion[]
+     * @return \Traversable|Criterion[]
      */
-    public function getCriteria(): array
+    public function getCriteria(): \Traversable
     {
         return $this->criteria;
+    }
+
+    /**
+     * @internal This method should only be used to optimize queries inside heuristic algorithms.
+     * @param Criterion[] ...$criteria
+     * @return void
+     */
+    public function removeCriterion(Criterion ...$criteria): void
+    {
+        foreach ($criteria as $criterion) {
+            $this->criteria->detach($criterion);
+        }
+    }
+
+    /**
+     * @internal This method should only be used to optimize queries inside heuristic algorithms.
+     * @param Criterion $original
+     * @param Criterion $new
+     * @return void
+     */
+    public function replaceCriterion(Criterion $original, Criterion $new): void
+    {
+        $this->criteria->detach($original);
+        $this->criteria->attach($new);
     }
 }

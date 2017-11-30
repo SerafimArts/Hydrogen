@@ -9,9 +9,6 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Query\Criterion;
 
-use Serafim\Hydrogen\Collection;
-use Doctrine\ORM\Mapping\ClassMetadata;
-
 /**
  * Class Limit
  */

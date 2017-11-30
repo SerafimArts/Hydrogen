@@ -28,9 +28,9 @@ abstract class MemoryRepository implements ObjectRepository
     private $meta;
 
     /**
-     * @var EntityManagerInterface
+     * @var Processor
      */
-    private $em;
+    private $processor;
 
     /**
      * ArrayRepository constructor.
@@ -40,7 +40,18 @@ abstract class MemoryRepository implements ObjectRepository
     public function __construct(EntityManagerInterface $em, ClassMetadata $meta)
     {
         $this->meta = $meta;
-        $this->em   = $em;
+        $this->processor = $this->getProcessor($em);
+    }
+
+    /**
+     * @param EntityManagerInterface $em
+     * @return Processor
+     */
+    private function getProcessor(EntityManagerInterface $em): Processor
+    {
+        $data = new Collection($this->getData());
+
+        return new CollectionProcessor($data, $em, $this->meta);
     }
 
     /**
@@ -54,15 +65,7 @@ abstract class MemoryRepository implements ObjectRepository
 
         $query = (new Builder())->where($primary, $id);
 
-        return $this->process()->first($query);
-    }
-
-    /**
-     * @return Processor
-     */
-    protected function process(): Processor
-    {
-        return new CollectionProcessor(new Collection($this->getData()), $this->em, $this->meta);
+        return $this->processor->first($query);
     }
 
     /**
@@ -75,7 +78,7 @@ abstract class MemoryRepository implements ObjectRepository
      */
     public function findAll(): Collection
     {
-        return $this->process()->get(new Builder());
+        return $this->processor->get(new Builder());
     }
 
     /**
@@ -84,7 +87,7 @@ abstract class MemoryRepository implements ObjectRepository
      */
     public function findOneBy(Builder $query)
     {
-        return $this->process()->first($query);
+        return $this->processor->first($query);
     }
 
     /**
@@ -93,7 +96,7 @@ abstract class MemoryRepository implements ObjectRepository
      */
     public function findBy(Builder $query): Collection
     {
-        return $this->process()->get($query);
+        return $this->processor->get($query);
     }
 
     /**
@@ -102,7 +105,7 @@ abstract class MemoryRepository implements ObjectRepository
      */
     public function count(Builder $query): int
     {
-        return $this->process()->count($query);
+        return $this->processor->count($query);
     }
 
     /**

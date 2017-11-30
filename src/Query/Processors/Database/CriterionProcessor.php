@@ -23,6 +23,11 @@ use Serafim\Hydrogen\Query\Criterion\Criterion;
 abstract class CriterionProcessor
 {
     /**
+     * @var int
+     */
+    private static $lastAliasId = 0;
+
+    /**
      * @var array
      */
     private $parameters = [];
@@ -56,6 +61,14 @@ abstract class CriterionProcessor
     }
 
     /**
+     * @return string
+     */
+    protected function getAlias(): string
+    {
+        return $this->alias;
+    }
+
+    /**
      * @param Criterion $criterion
      * @param QueryBuilder $builder
      * @return QueryBuilder
@@ -70,11 +83,7 @@ abstract class CriterionProcessor
      */
     protected function pattern(string $field, $value): string
     {
-        try {
-            $pattern = \sprintf('f%s', Str::random(7));
-        } catch (\Exception $e) {
-            $pattern = Str::substr(\md5(\random_int(\PHP_INT_MIN, \PHP_INT_MAX) . $field), 8);
-        }
+        $pattern = $this->createAlias('field_', $field);
 
         $this->parameters[$pattern] = $value;
 
@@ -82,12 +91,30 @@ abstract class CriterionProcessor
     }
 
     /**
-     * @param string $field
+     * @param string $prefix
+     * @param string|null $seed
      * @return string
      */
-    protected function fieldName(string $field): string
+    protected function createAlias(string $prefix = 'field_', string $seed = null): string
     {
-        return Builder::fieldName($field, $this->alias);
+        $alias = Str::snake(\class_basename($seed ?? $this->meta->getName()));
+        $alias = \str_replace('.', '_', $alias);
+
+        return \vsprintf('%s%s_%d', [
+            $prefix,
+            $alias,
+            ++self::$lastAliasId
+        ]);
+    }
+
+    /**
+     * @param string $field
+     * @param string|null $alias
+     * @return string
+     */
+    protected function fieldName(string $field, string $alias = null): string
+    {
+        return Builder::fieldName($field, $alias ?? $this->alias);
     }
 
     /**
