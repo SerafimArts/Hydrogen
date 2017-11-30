@@ -361,3 +361,29 @@ foreach ($collection as ['a' => $a]) {
     \var_dump($a); // 'A'
 }
 ```
+
+## Heuristic algorithms
+
+### Where in
+
+This optimization determines how many elements are inside the 
+"`WHERE IN`" the sample, and in the event that the value contains 
+only one element replaces "`WHERE A IN (B)`" with "`WHERE A = B`".
+
+```php
+Query::whereIn('some', [1, 2, 3]);
+// > "... WHERE `some` IN (1, 2, 3)"
+
+Query::whereIn('some', [1]);
+// > "... WHERE `some` = 1"
+```
+
+Just example benchmarks (MySQL 5.8) which do not claim to be true:
+
+```sql
+sql> SELECT * FROM example WHERE id IN (1)
+# 1 row retrieved starting from 1 in 22ms (execution: 9ms, fetching: 13ms)
+
+sql> SELECT * FROM example WHERE id = 1
+# 1 row retrieved starting from 1 in 15ms (execution: 8ms, fetching: 7ms)
+```
