@@ -7,7 +7,9 @@
     <a href="https://packagist.org/packages/serafim/hydrogen"><img src="https://poser.pugx.org/serafim/hydrogen/v/unstable" alt="Latest Unstable Version"></a>
     <a href="https://raw.githubusercontent.com/serafim/hydrogen/master/LICENSE"><img src="https://poser.pugx.org/serafim/hydrogen/license" alt="License MIT"></a>
 </p>
-    
+
+## Introduction
+
 - [Introduction](#introduction)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -26,8 +28,6 @@
     - [Destructuring](#destructuring)
 - [Heuristic algorithms](#heuristic-algorithms)
     - [WHERE IN](#where-in)
-    
-## Introduction
 
 This package contains a set of frequently used functions of Doctrine ORM 
 that are optimized for more convenient usage.
