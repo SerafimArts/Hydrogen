@@ -16,6 +16,7 @@ use Serafim\Hydrogen\Collection;
 use Serafim\Hydrogen\Query\Builder;
 use Serafim\Hydrogen\Query\Processors\CollectionProcessor;
 use Serafim\Hydrogen\Query\Processors\Processor;
+use Serafim\Hydrogen\Query\Proxy;
 
 /**
  * Class MemoryRepository
