@@ -24,11 +24,6 @@ class Proxy extends Builder
     private $repository;
 
     /**
-     * @var array
-     */
-    private $scopes = [];
-
-    /**
      * Proxy constructor.
      * @param ObjectRepository $repository
      */
@@ -36,52 +31,6 @@ class Proxy extends Builder
     {
         $this->repository = $repository;
         parent::__construct();
-    }
-
-    /**
-     * @param object|string $context
-     * @return Proxy
-     */
-    public function scope($context): self
-    {
-        $this->scopes[] = $context;
-
-        if (\is_object($context)) {
-            $this->scopes[] = \get_class($context);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param string $method
-     * @param array $arguments
-     * @return $this|Builder|Proxy
-     */
-    public function __call(string $method, array $arguments = []): Proxy
-    {
-        $scope = $this->getScopeMethod($method);
-
-        if ($scope !== null) {
-            $scope($this, ...$arguments);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param string $method
-     * @return |null
-     */
-    private function getScopeMethod(string $method): ?\Closure
-    {
-        $action = 'scope' . Str::studly($method);
-
-        foreach ($this->scopes as $context) {
-            if (\method_exists($context, $action)) {
-                return \Closure::fromCallable([$context, $action]);
-            }
-        }
     }
 
     /**

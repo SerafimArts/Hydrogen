@@ -22,6 +22,7 @@
     - [PhpFileRepository](#phpfilerepository)
     - [Selections](#selections)
     - ["In-place" queries](#in-place-queries)
+    - [Scopes](#scopes)
 - [Collections](#collections)
     - [Higher Order Messaging](#higher-order-messaging)
     - [Static constructors](#static-constructors)
@@ -269,7 +270,7 @@ $result = $repository->findAll($query);
 
 ### "In-place" queries
 
-You can make queries on the spot using these repositories as a data source =)
+You can make queries on the spot using these repositories as a data source.
 
 ```php
 $repository = $em->getRepository(EntityClass::class);
@@ -277,7 +278,55 @@ $repository = $em->getRepository(EntityClass::class);
 Query::from($repository)
     ->where('id', 23)
     ->get(); // Collection { EntityClass, EntityClass }
-``` 
+```
+
+### Scopes
+
+Also you can create "parts" of the query and separate them into other methods or classes.
+Each method should be referred to as "scope" + METHOD_NAME. When you call a `query()` inside 
+the repository, it is already the source of scopes.
+
+```php
+class FriendsRepository extends DatabaseRepository
+{
+    public function findByUser(User $user): Collection
+    {
+        return $this->query()
+            ->of($user)     // Call "scopeOf(..., $user)"
+            ->latest()      // Call "scopeLatest(...)"
+            ->get();
+    }
+    
+    public function scopeOf(Builder $query, User $user)
+    {
+        return $query->where('user', $user);
+    }
+    
+    public function scopeLatest(Builder $query)
+    {
+        return $query->desc('befriended_at');
+    }
+}
+```
+
+Also, the source of the scopes can be added by calling the corresponding query method.
+
+```php
+class FriendsRepository extends DatabaseRepository
+{
+    public function query(): Builder
+    {
+        return parent::query()->scope(SomeClass::class, AnyClass::class, ...);
+    }
+}
+```
+
+Or 
+
+```php
+$query = Query::new()->scope(SomeClass::class, AnyClass::class, $scopes);
+```
+
 
 ## Collections
 

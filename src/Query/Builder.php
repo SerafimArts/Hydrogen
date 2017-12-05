@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Query;
 
+use Illuminate\Support\Str;
 use Serafim\Hydrogen\Query\Criterion\Criterion;
 use Serafim\Hydrogen\Query\Criterion\GroupBy;
 use Serafim\Hydrogen\Query\Criterion\Limit;
@@ -38,6 +39,11 @@ class Builder
      * @var bool
      */
     private $thenOr = false;
+
+    /**
+     * @var array|string[]|object[]
+     */
+    private $scopes = [];
 
     /**
      * Builder constructor.
@@ -357,6 +363,55 @@ class Builder
         }
 
         return null;
+    }
+
+    /**
+     * @param string $method
+     * @param array $arguments
+     * @return $this|Builder|Proxy
+     */
+    public function __call(string $method, array $arguments = []): Proxy
+    {
+        $scope = $this->getScopeMethod($method);
+
+        if ($scope !== null) {
+            $scope($this, ...$arguments);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param object[]|string[] $contexts
+     * @return Proxy
+     */
+    public function scope(...$contexts): self
+    {
+        foreach ($contexts as $context) {
+            $this->scopes[] = $context;
+
+            if (\is_object($context)) {
+                $this->scopes[] = \get_class($context);
+            }
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * @param string $method
+     * @return |null
+     */
+    private function getScopeMethod(string $method): ?\Closure
+    {
+        $action = 'scope' . Str::studly($method);
+
+        foreach ($this->scopes as $context) {
+            if (\method_exists($context, $action)) {
+                return \Closure::fromCallable([$context, $action]);
+            }
+        }
     }
 
     /**
