@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Query\Collection;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
@@ -107,9 +108,9 @@ class ArrayHydrator
             $relation = $prefix . $this->getJoinColumnOf($property, $mappings);
 
             if ($this->isToOne($mappings)) {
-                $this->loadSingleRelation($entity, $mappings, $data[$relation] ?? null, $prefix);
+                $this->loadSingleRelation($entity, $mappings, $data[$relation] ?? null);
             } elseif ($this->isToMany($mappings)) {
-                $this->loadCollectionRelation($entity, $mappings, $data[$relation] ?? null, $prefix);
+                $this->loadCollectionRelation($entity, $mappings, $data[$relation] ?? null);
             }
         }
     }
@@ -119,10 +120,9 @@ class ArrayHydrator
      * @param object $entity
      * @param array $mappings
      * @param string|int $value
-     * @param string $prefix
      * @return void
      */
-    private function loadSingleRelation($entity, array $mappings, $value, string $prefix): void
+    private function loadSingleRelation($entity, array $mappings, $value): void
     {
         if ($value === null) {
             // Empty relation
@@ -139,15 +139,14 @@ class ArrayHydrator
      * @param object $entity
      * @param array $mappings
      * @param string|int $value
-     * @param string $prefix
      * @return void
      * @throws \LogicException
      */
-    private function loadCollectionRelation($entity, array $mappings, $value, string $prefix): void
+    private function loadCollectionRelation($entity, array $mappings, $value): void
     {
         if ($value === null) {
             // Empty collection
-            $this->meta->setFieldValue($entity, $mappings['fieldName'], new Collection());
+            $this->meta->setFieldValue($entity, $mappings['fieldName'], new ArrayCollection([]));
             return;
         }
 
