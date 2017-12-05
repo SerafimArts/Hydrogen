@@ -41,6 +41,11 @@ class CollectionProcessor extends BaseProcessor
     private $items;
 
     /**
+     * @var ArrayHydrator
+     */
+    private $hydrator;
+
+    /**
      * CollectionBuilder constructor.
      * @param Collection $items
      * @param EntityManagerInterface $em
@@ -49,7 +54,7 @@ class CollectionProcessor extends BaseProcessor
     public function __construct(Collection $items, EntityManagerInterface $em, ClassMetadata $meta)
     {
         $this->items = $items;
-
+        $this->hydrator = new ArrayHydrator($em, $meta);
         parent::__construct($em, $meta);
     }
 
@@ -58,7 +63,6 @@ class CollectionProcessor extends BaseProcessor
      * @return Collection
      * @throws \LogicException
      * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\Mapping\MappingException
      */
     public function get(Builder $builder): Collection
     {
@@ -70,7 +74,6 @@ class CollectionProcessor extends BaseProcessor
      * @return Collection
      * @throws \LogicException
      * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\Mapping\MappingException
      */
     private function query(Builder $builder): Collection
     {
@@ -88,14 +91,11 @@ class CollectionProcessor extends BaseProcessor
     /**
      * @param Collection $collection
      * @return Collection
-     * @throws \LogicException
      */
     private function applyMappings(Collection $collection): Collection
     {
-        $hydrator = new ArrayHydrator($this->em, $this->meta);
-
-        return $collection->map(function (array $data) use ($hydrator) {
-            return $hydrator->hydrate($data);
+        return $collection->map(function (array $data) {
+            return $this->hydrator->hydrate($data);
         });
     }
 
@@ -104,7 +104,6 @@ class CollectionProcessor extends BaseProcessor
      * @return mixed
      * @throws \LogicException
      * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\Mapping\MappingException
      */
     public function first(Builder $builder)
     {
@@ -116,7 +115,6 @@ class CollectionProcessor extends BaseProcessor
      * @return int
      * @throws \LogicException
      * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\Mapping\MappingException
      */
     public function count(Builder $builder): int
     {

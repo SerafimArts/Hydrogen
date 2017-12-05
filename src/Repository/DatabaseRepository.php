@@ -37,6 +37,7 @@ abstract class DatabaseRepository implements ObjectRepository
      * DatabaseRepository constructor.
      * @param EntityManagerInterface|EntityManager $em
      * @param ClassMetadata|ClassMetadataInterface $meta
+     * @throws \Exception
      */
     public function __construct(EntityManagerInterface $em, ClassMetadata $meta)
     {

@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Query\Collection;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Serafim\Hydrogen\Collection;
 
@@ -20,93 +20,165 @@ use Serafim\Hydrogen\Collection;
 class ArrayHydrator
 {
     /**
-     * @var ClassMetadata
-     */
-    private $meta;
-
-    /**
      * @var EntityManagerInterface
      */
     private $em;
 
     /**
-     * Hydrator constructor.
+     * @var ClassMetadata
+     */
+    private $meta;
+
+    /**
+     * ArrayHydrator constructor.
      * @param EntityManagerInterface $em
      * @param ClassMetadata $meta
      */
     public function __construct(EntityManagerInterface $em, ClassMetadata $meta)
     {
-        $this->meta = $meta;
         $this->em = $em;
+        $this->meta = $meta;
     }
 
     /**
      * @param array $data
+     * @param string $prefix
      * @return object
-     * @throws \LogicException
      * @throws \Doctrine\ORM\Mapping\MappingException
+     * @throws \LogicException
      */
-    public function hydrate(array $data)
+    public function hydrate(array $data, string $prefix = '')
     {
         $instance = $this->meta->newInstance();
 
-        $this->loadFieldValues($instance, $data);
-        $this->loadRelations($instance, $data);
+        return $this->hydrateObject($instance, $this->meta, $data, $prefix);
+    }
 
-        return $instance;
+    /**
+     * @param object $object
+     * @param ClassMetadata $meta
+     * @param array $data
+     * @param string $prefix
+     * @return object
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     * @throws \LogicException
+     */
+    private function hydrateObject($object, ClassMetadata $meta, array $data, string $prefix)
+    {
+        $this->loadFields($object, $meta, $data, $prefix);
+        $this->loadRelations($object, $meta, $data, $prefix);
+        $this->loadEmbeddable($object, $meta, $data, $prefix);
+
+        return $object;
     }
 
     /**
      * @param object $entity
+     * @param ClassMetadata $meta
      * @param array $data
+     * @param string $prefix
      * @return void
      */
-    private function loadFieldValues($entity, array $data): void
+    private function loadFields($entity, ClassMetadata $meta, array $data, string $prefix): void
     {
-        foreach ($this->meta->getFieldNames() as $field) {
-            $column = $this->meta->getColumnName($field);
+        foreach ($meta->getFieldNames() as $field) {
+            $column = $meta->getColumnName($field);
 
-            if (\array_key_exists($column, $data)) {
-                $this->meta->setFieldValue($entity, $field, $data[$column]);
+            if (\array_key_exists($prefix . $column, $data)) {
+                $meta->setFieldValue($entity, $field, $data[$prefix . $column]);
             }
         }
     }
 
     /**
+     * TODO Make sure that the relationships inside embeddable (with $prefix) works correctly.
+     *
      * @param object $entity
+     * @param ClassMetadata $meta
      * @param array $data
+     * @param string $prefix
      * @return void
      * @throws \Doctrine\ORM\Mapping\MappingException
      * @throws \LogicException
      */
-    private function loadRelations($entity, array $data): void
+    private function loadRelations($entity, ClassMetadata $meta, array $data, string $prefix): void
     {
-        foreach ($this->meta->getAssociationMappings() as $property => $mappings) {
-            if ($this->meta->isInheritedAssociation($property)) {
-                $this->loadEmbeddable($entity, $mappings, $data);
-                continue;
-            }
-
-            $relation = $this->getJoinColumnOf($property, $mappings);
+        foreach ($meta->getAssociationMappings() as $property => $mappings) {
+            $relation = $prefix . $this->getJoinColumnOf($property, $mappings);
 
             if ($this->isToOne($mappings)) {
-                $this->loadSingleRelation($entity, $mappings, $data[$relation] ?? null);
+                $this->loadSingleRelation($entity, $mappings, $data[$relation] ?? null, $prefix);
             } elseif ($this->isToMany($mappings)) {
-                $this->loadCollectionRelation($entity, $mappings, $data[$relation] ?? null);
+                $this->loadCollectionRelation($entity, $mappings, $data[$relation] ?? null, $prefix);
             }
         }
     }
 
+
     /**
-     * @param $entity
+     * @param object $entity
      * @param array $mappings
-     * @param array $values
+     * @param string|int $value
+     * @param string $prefix
+     * @return void
+     */
+    private function loadSingleRelation($entity, array $mappings, $value, string $prefix): void
+    {
+        if ($value === null) {
+            // Empty relation
+            return;
+        }
+
+        $relation = $this->em->find($mappings['targetEntity'], $value);
+
+        $this->meta->setFieldValue($entity, $mappings['fieldName'], $relation);
+    }
+
+
+    /**
+     * @param object $entity
+     * @param array $mappings
+     * @param string|int $value
+     * @param string $prefix
      * @return void
      * @throws \LogicException
      */
-    private function loadEmbeddable($entity, array $mappings, array $values): void
+    private function loadCollectionRelation($entity, array $mappings, $value, string $prefix): void
     {
-        throw new \LogicException('Embeddable did not support yet');
+        if ($value === null) {
+            // Empty collection
+            $this->meta->setFieldValue($entity, $mappings['fieldName'], new Collection());
+            return;
+        }
+
+        throw new \LogicException(__METHOD__ . ' not implemented yet');
+    }
+
+
+    /**
+     * @param array $mapping
+     * @return bool
+     */
+    private function isToOne(array $mapping): bool
+    {
+        // TODO: Change to bit mask usage
+        return \in_array($mapping['type'] ?? null, [
+            ClassMetadataInfo::ONE_TO_ONE,
+            ClassMetadataInfo::MANY_TO_ONE,
+        ], true);
+    }
+
+    /**
+     * @param array $mapping
+     * @return bool
+     */
+    private function isToMany(array $mapping): bool
+    {
+        // TODO: Change to bit mask usage
+        return \in_array($mapping['type'] ?? null, [
+            ClassMetadataInfo::ONE_TO_MANY,
+            ClassMetadataInfo::MANY_TO_MANY,
+        ], true);
     }
 
     /**
@@ -126,7 +198,6 @@ class ArrayHydrator
         // Inverse relation
         $target = $this->em->getClassMetadata($mappings['targetEntity']);
         $association = $target->getAssociationMapping($mappings['mappedBy']);
-
         $column = \array_first($association['joinColumns'])['referencedColumnName'];
 
         if ($column === null) {
@@ -137,75 +208,25 @@ class ArrayHydrator
         return $column;
     }
 
-    /**
-     * @param array $mapping
-     * @return bool
-     */
-    private function isToOne(array $mapping): bool
-    {
-        // TODO: Change to bit mask usage
-        return \in_array($mapping['type'] ?? null, [
-            ClassMetadataInfo::ONE_TO_ONE,
-            ClassMetadataInfo::MANY_TO_ONE,
-        ], true);
-    }
 
     /**
      * @param object $entity
-     * @param array $mappings
-     * @param string|int $value
+     * @param ClassMetadata $meta
+     * @param array $data
+     * @param string $prefix
      * @return void
-     */
-    private function loadSingleRelation($entity, array $mappings, $value): void
-    {
-        if ($value === null) {
-            // Empty relation
-            return;
-        }
-
-        $relation = $this->em->find($mappings['targetEntity'], $value);
-
-        $this->meta->setFieldValue($entity, $mappings['fieldName'], $relation);
-    }
-
-    /**
-     * @param array $mapping
-     * @return bool
-     */
-    private function isToMany(array $mapping): bool
-    {
-        // TODO: Change to bit mask usage
-        return \in_array($mapping['type'] ?? null, [
-            ClassMetadataInfo::ONE_TO_MANY,
-            ClassMetadataInfo::MANY_TO_MANY,
-        ], true);
-    }
-
-    /**
-     * @param object $entity
-     * @param array $mappings
-     * @param string|int $value
-     * @return void
+     * @throws \Doctrine\ORM\Mapping\MappingException
      * @throws \LogicException
      */
-    private function loadCollectionRelation($entity, array $mappings, $value): void
+    private function loadEmbeddable($entity, ClassMetadata $meta, array $data, string $prefix = ''): void
     {
-        if ($value === null) {
-            // Empty collection
-            $this->meta->setFieldValue($entity, $mappings['fieldName'], $this->getCollection([]));
+        foreach ($meta->embeddedClasses as $field => $mappings) {
+            $sub = $this->em->getClassMetadata($mappings['class']);
 
-            return;
+            $columnPrefix = $prefix . (string)$mappings['columnPrefix'];
+            $instance = $this->hydrateObject($sub->newInstance(), $sub, $data, $columnPrefix);
+
+            $meta->setFieldValue($entity, $field, $instance);
         }
-
-        throw new \LogicException(__METHOD__ . ' not implemented yet');
-    }
-
-    /**
-     * @param array $items
-     * @return iterable
-     */
-    public function getCollection(array $items): iterable
-    {
-        return new Collection($items);
     }
 }
