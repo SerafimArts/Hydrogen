@@ -48,11 +48,6 @@ class DatabaseProcessor extends BaseProcessor
     private $alias;
 
     /**
-     * @var QueryBuilder
-     */
-    private $query;
-
-    /**
      * DatabaseBuilder constructor.
      * @param EntityManagerInterface $em
      * @param ClassMetadata $meta
@@ -62,7 +57,6 @@ class DatabaseProcessor extends BaseProcessor
     public function __construct(EntityManagerInterface $em, ClassMetadata $meta, string $alias = null)
     {
         $this->alias = $alias ?? $this->createAlias($meta);
-        $this->query = $this->bootQuery($this->alias, $em, $meta);
 
         parent::__construct($em, $meta);
     }
@@ -82,16 +76,15 @@ class DatabaseProcessor extends BaseProcessor
 
     /**
      * @param string $alias
-     * @param EntityManagerInterface $em
-     * @param ClassMetadata $meta
      * @return QueryBuilder
-     * @throws \InvalidArgumentException
      */
-    private function bootQuery(string $alias, EntityManagerInterface $em, ClassMetadata $meta): QueryBuilder
+    protected function createQueryBuilder(string $alias): QueryBuilder
     {
-        return $em->createQueryBuilder()
-            ->select($alias)
-            ->from($meta->getReflectionClass()->getName(), $alias);
+        $builder = new QueryBuilder($this->em);
+        $builder->select($alias);
+        $builder->from($this->meta->getName(), $alias);
+
+        return $builder;
     }
 
     /**
@@ -114,14 +107,19 @@ class DatabaseProcessor extends BaseProcessor
     private function query(Builder $builder): QueryBuilder
     {
         //
+        // Make sure that the Builder is immutable. Do not touch him.
+        //
+        $builder = clone $builder;
+
+        //
+        // Create a new query
+        //
+        $query = $this->createQueryBuilder($this->alias);
+
+        //
         // Apply global query optimisations.
         //
         $builder = $this->optimiseQuery($builder);
-
-        //
-        // Make sure that the Builder is immutable. Do not touch him.
-        //
-        $query = clone $this->query;
 
         //
         // Build query
@@ -141,8 +139,11 @@ class DatabaseProcessor extends BaseProcessor
     public function first(Builder $builder)
     {
         try {
-            return $this->query($builder)->getQuery()->getSingleResult();
-        } catch (NoResultException | \InvalidArgumentException $empty) {
+            $query = $this->query($builder);
+            $query->setMaxResults(1);
+
+            return $query->getQuery()->getOneOrNullResult();
+        } catch (\InvalidArgumentException $empty) {
             return null;
         }
     }
@@ -182,6 +183,15 @@ class DatabaseProcessor extends BaseProcessor
     public function toDql(Builder $builder): string
     {
         return $this->query($builder)->getDQL();
+    }
+
+    /**
+     * @param Builder $builder
+     * @return string
+     */
+    public function toSql(Builder $builder): string
+    {
+        return $this->query($builder)->getQuery()->getSQL();
     }
 
     /**

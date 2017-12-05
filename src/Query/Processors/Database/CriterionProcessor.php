@@ -100,11 +100,11 @@ abstract class CriterionProcessor
         $alias = Str::snake(\class_basename($seed ?? $this->meta->getName()));
         $alias = \str_replace('.', '_', $alias);
 
-        return \vsprintf('%s%s_%d', [
-            $prefix,
-            $alias,
-            ++self::$lastAliasId
-        ]);
+        if (self::$lastAliasId === \PHP_INT_MAX) {
+            self::$lastAliasId = 0;
+        }
+
+        return \sprintf('%s%s_%d', $prefix, $alias, ++self::$lastAliasId);
     }
 
     /**
@@ -122,7 +122,10 @@ abstract class CriterionProcessor
      */
     protected function getParameters(): array
     {
-        return $this->parameters;
+        $parameters = $this->parameters;
+        $this->parameters = [];
+
+        return $parameters;
     }
 
     /**

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Serafim\Hydrogen\Repository;
 
 use Serafim\Hydrogen\Collection;
+use Serafim\Hydrogen\Query\Proxy;
 use Serafim\Hydrogen\Query\Builder;
 
 /**
@@ -64,7 +65,7 @@ interface ObjectRepository
     public function getClassName(): string;
 
     /**
-     * @return Builder
+     * @return Proxy|Builder|$this
      */
     public function query(): Builder;
 }

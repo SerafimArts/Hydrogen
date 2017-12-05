@@ -17,6 +17,7 @@ use Serafim\Hydrogen\Collection;
 use Serafim\Hydrogen\Query\Builder;
 use Serafim\Hydrogen\Query\Processors\DatabaseProcessor;
 use Serafim\Hydrogen\Query\Processors\Processor;
+use Serafim\Hydrogen\Query\Proxy;
 
 /**
  * Class DatabaseRepository
@@ -80,6 +81,15 @@ abstract class DatabaseRepository implements ObjectRepository
 
     /**
      * @param Builder $query
+     * @return string
+     */
+    public function sql(Builder $query): string
+    {
+        return $this->processor->toSql($query);
+    }
+
+    /**
+     * @param Builder $query
      * @return null|object
      * @throws \Exception
      */
@@ -117,10 +127,10 @@ abstract class DatabaseRepository implements ObjectRepository
     }
 
     /**
-     * @return Builder
+     * @return Builder|Proxy|$this
      */
     public function query(): Builder
     {
-        return new Builder();
+        return (new Proxy($this))->scope($this);
     }
 }

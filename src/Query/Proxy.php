@@ -9,13 +9,14 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Query;
 
+use Illuminate\Support\Str;
 use Serafim\Hydrogen\Collection;
 use Serafim\Hydrogen\Repository\ObjectRepository;
 
 /**
  * Class Proxy
  */
-class Proxy
+class Proxy extends Builder
 {
     /**
      * @var ObjectRepository
@@ -23,9 +24,9 @@ class Proxy
     private $repository;
 
     /**
-     * @var Builder
+     * @var array
      */
-    private $builder;
+    private $scopes = [];
 
     /**
      * Proxy constructor.
@@ -34,15 +35,22 @@ class Proxy
     public function __construct(ObjectRepository $repository)
     {
         $this->repository = $repository;
-        $this->builder = new Builder();
+        parent::__construct();
     }
 
     /**
-     * @return Builder
+     * @param object|string $context
+     * @return Proxy
      */
-    public function toBuilder(): Builder
+    public function scope($context): self
     {
-        return $this->builder;
+        $this->scopes[] = $context;
+
+        if (\is_object($context)) {
+            $this->scopes[] = \get_class($context);
+        }
+
+        return $this;
     }
 
     /**
@@ -52,20 +60,28 @@ class Proxy
      */
     public function __call(string $method, array $arguments = []): Proxy
     {
-        $this->builder = $this->builder->$method(...$arguments);
+        $scope = $this->getScopeMethod($method);
+
+        if ($scope !== null) {
+            $scope($this, ...$arguments);
+        }
 
         return $this;
     }
 
     /**
-     * @param string $property
-     * @return $this|Builder|Proxy
+     * @param string $method
+     * @return |null
      */
-    public function __get(string $property): Proxy
+    private function getScopeMethod(string $method): ?\Closure
     {
-        $this->builder = $this->builder->$property;
+        $action = 'scope' . Str::studly($method);
 
-        return $this;
+        foreach ($this->scopes as $context) {
+            if (\method_exists($context, $action)) {
+                return \Closure::fromCallable([$context, $action]);
+            }
+        }
     }
 
     /**
@@ -73,7 +89,7 @@ class Proxy
      */
     public function get(): Collection
     {
-        return $this->repository->findBy($this->builder);
+        return $this->repository->findBy($this);
     }
 
     /**
@@ -81,7 +97,7 @@ class Proxy
      */
     public function first()
     {
-        return $this->repository->findOneBy($this->builder);
+        return $this->repository->findOneBy($this);
     }
 
     /**
@@ -89,6 +105,6 @@ class Proxy
      */
     public function count(): int
     {
-        return $this->repository->count($this->builder);
+        return $this->repository->count($this);
     }
 }

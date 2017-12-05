@@ -34,7 +34,11 @@ class WhereProcessor extends CriterionProcessor
 
         $query = $criterion->isAnd() ? $builder->andWhere($expr) : $builder->orWhere($expr);
 
-        return $query->setParameters($this->getParameters());
+        foreach ($this->getParameters() as $key => $value) {
+            $query->setParameter($key, $value);
+        }
+
+        return $query;
     }
 
     /**

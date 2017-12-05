@@ -109,11 +109,11 @@ abstract class MemoryRepository implements ObjectRepository
     }
 
     /**
-     * @return Builder
+     * @return Builder|Proxy|$this
      */
     public function query(): Builder
     {
-        return new Builder();
+        return (new Proxy($this))->scope($this);
     }
 
     /**
