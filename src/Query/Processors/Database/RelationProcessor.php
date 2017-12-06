@@ -11,6 +11,7 @@ namespace Serafim\Hydrogen\Query\Processors\Database;
 
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\QueryBuilder;
+use Serafim\Hydrogen\Query\Builder;
 use Serafim\Hydrogen\Query\Criterion\Criterion;
 use Serafim\Hydrogen\Query\Criterion\Relation;
 
@@ -35,7 +36,27 @@ class RelationProcessor extends CriterionProcessor
 
         $builder = $builder->leftJoin($relationField, $relationAlias);
 
+        $builder = $this->applyRelationsQuery($relationAlias, $criterion, $builder);
+
         return $builder;
+    }
+
+    /**
+     * @param string $alias
+     * @param Relation $relation
+     * @param QueryBuilder $query
+     * @return QueryBuilder
+     * @throws \InvalidArgumentException
+     */
+    public function applyRelationsQuery(string $alias, Relation $relation, QueryBuilder $query): QueryBuilder
+    {
+        $builder  = new Builder();
+
+        $callable = $relation->getContext();
+        $callable($builder);
+
+
+        return $this->getProcessor()->applyQueryBuilder($query, $builder, $alias);
     }
 
     /**

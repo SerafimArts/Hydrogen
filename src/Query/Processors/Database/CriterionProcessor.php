@@ -29,18 +29,22 @@ abstract class CriterionProcessor implements CriterionProcessorInterface
      * @var int
      */
     private static $lastAliasId = 0;
+
     /**
      * @var EntityManagerInterface
      */
     protected $em;
+
     /**
      * @var ClassMetadata
      */
     protected $meta;
+
     /**
      * @var array
      */
     private $parameters = [];
+
     /**
      * @var string
      */
@@ -67,7 +71,7 @@ abstract class CriterionProcessor implements CriterionProcessorInterface
     }
 
     /**
-     * @return Processor
+     * @return Processor|DatabaseProcessor
      */
     public function getProcessor(): Processor
     {

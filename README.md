@@ -15,6 +15,7 @@
 - [Installation](#installation)
 - [Queries](#queries)
     - [Eager loading](#eager-loading)
+    - [Relation selection](#relation-selection)
 - [Repositories](#repositories)
     - [DatabaseRepository](#databaserepository)
     - [MemoryRepository](#memoryrepository)
@@ -146,13 +147,35 @@ $query = Query::whereIn('id', [1, 2])
 $children->findAll($query);
 
 /**
- * SELECT ... FROM children d0_ LEFT JOIN parents s1_ ON d0_.parent_id = s1_.id WHERE d0_.id IN ("1", "2");
+ * SELECT c, p
+ * FROM children c
+ * LEFT JOIN parents p ON c.parent_id = p.id
+ * WHERE c.id IN ("1", "2");
  */
 ```
 
-Beethooven approves =)
+Beethooven approves.
 
 ![https://habrastorage.org/webt/lf/hw/dn/lfhwdnvjxlt9vrsbrd_ajpitubc.png](https://habrastorage.org/webt/lf/hw/dn/lfhwdnvjxlt9vrsbrd_ajpitubc.png)
+
+### Relation selection
+
+You can add sample criteria for relationships using the second argument of the `with` method.
+
+```php
+$query->where('id', [1, 2])->with('parent', function(Buidler $parent) {
+    $parent->where('id', [33, 42]);
+});
+
+/**
+ * SELECT child, parent
+ * FROM children child
+ * LEFT JOIN parents parent ON child.parent_id = parent.id
+ * WHERE
+ *    child.id IN ("1", "2") AND
+ *    parent.id IN ("33", "42");
+ */
+```
 
 ## Repositories
 

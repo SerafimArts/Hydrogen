@@ -51,7 +51,7 @@ abstract class CriterionProcessor implements CriterionProcessorInterface
     }
 
     /**
-     * @return Processor
+     * @return Processor|CollectionProcessor
      */
     public function getProcessor(): Processor
     {

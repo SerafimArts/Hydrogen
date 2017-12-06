@@ -106,15 +106,24 @@ class DatabaseProcessor extends BaseProcessor
      */
     private function query(Builder $builder): QueryBuilder
     {
+        $query = $this->createQueryBuilder($this->alias);
+
+        return $this->applyQueryBuilder($query, $builder);
+    }
+
+    /**
+     * @param QueryBuilder|Collection $query
+     * @param Builder $builder
+     * @param string|null $alias
+     * @return QueryBuilder
+     * @throws \InvalidArgumentException
+     */
+    public function applyQueryBuilder(QueryBuilder $query, Builder $builder, string $alias = null): QueryBuilder
+    {
         //
         // Make sure that the Builder is immutable. Do not touch him.
         //
         $builder = clone $builder;
-
-        //
-        // Create a new query
-        //
-        $query = $this->createQueryBuilder($this->alias);
 
         //
         // Apply global query optimisations.
@@ -125,7 +134,7 @@ class DatabaseProcessor extends BaseProcessor
         // Build query
         //
         foreach ($builder->getCriteria() as $criterion) {
-            $query = $this->getCriterionProcessor($criterion)
+            $query = $this->getCriterionProcessor($criterion, $alias ?? $this->alias)
                 ->process($criterion, $query);
         }
 
@@ -198,11 +207,12 @@ class DatabaseProcessor extends BaseProcessor
 
     /**
      * @param string $processor
+     * @param string $alias
      * @return CriterionProcessor
      */
-    final protected function createProcessor(string $processor): CriterionProcessor
+    final protected function createProcessor(string $processor, string $alias): CriterionProcessor
     {
-        return new $processor($this, $this->alias, $this->em, $this->meta);
+        return new $processor($this, $alias, $this->em, $this->meta);
     }
 
     /**

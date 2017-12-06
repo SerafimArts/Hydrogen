@@ -82,7 +82,7 @@ class CollectionProcessor extends BaseProcessor
         });
 
         foreach ($builder->getCriteria() as $criterion) {
-            $collection = $this->getCriterionProcessor($criterion)
+            $collection = $this->getCriterionProcessor($criterion, '')
                 ->process($criterion, $collection);
         }
 
@@ -139,9 +139,10 @@ class CollectionProcessor extends BaseProcessor
 
     /**
      * @param string $processor
+     * @param string $alias
      * @return CriterionProcessor
      */
-    final protected function createProcessor(string $processor): CriterionProcessor
+    final protected function createProcessor(string $processor, string $alias): CriterionProcessor
     {
         return new $processor($this, $this->em, $this->meta);
     }

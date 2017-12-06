@@ -23,7 +23,7 @@ use Serafim\Hydrogen\Query\Processors\Collection\CriterionProcessor as Collectio
 abstract class BaseProcessor implements Processor
 {
     /**
-     * @var array|DatabaseCriterionProcessor[]|CollectionCriterionProcessor[]
+     * @var array|string[]
      */
     private $processors = [];
 
@@ -62,7 +62,7 @@ abstract class BaseProcessor implements Processor
     private function bootProcessors(): void
     {
         foreach ($this->getProcessorMappings() as $name => $class) {
-            $this->processors[$name] = $this->createProcessor($class);
+            $this->processors[$name] = $class;;
         }
     }
 
@@ -78,9 +78,10 @@ abstract class BaseProcessor implements Processor
 
     /**
      * @param string $processor
+     * @param string $alias
      * @return DatabaseCriterionProcessor|CollectionCriterionProcessor|object
      */
-    abstract protected function createProcessor(string $processor);
+    abstract protected function createProcessor(string $processor, string $alias);
 
     /**
      * @return iterable
@@ -94,10 +95,11 @@ abstract class BaseProcessor implements Processor
 
     /**
      * @param Criterion $criterion
+     * @param string $alias
      * @return DatabaseCriterionProcessor|CollectionCriterionProcessor
      * @throws \InvalidArgumentException
      */
-    protected function getCriterionProcessor(Criterion $criterion)
+    protected function getCriterionProcessor(Criterion $criterion, string $alias): CriterionProcessor
     {
         $class = \get_class($criterion);
 
@@ -106,7 +108,7 @@ abstract class BaseProcessor implements Processor
             throw new \InvalidArgumentException($error);
         }
 
-        return $this->processors[$class];
+        return $this->createProcessor($this->processors[$class], $alias);
     }
 
     /**
