@@ -26,7 +26,7 @@ class WhereProcessor extends CriterionProcessor
      * @return Collection
      * @throws \InvalidArgumentException
      */
-    public function process(Criterion $criterion, Collection $collection): Collection
+    public function process(Criterion $criterion, $collection): Collection
     {
         $column = $this->meta->getColumnName($criterion->getField());
 

@@ -16,49 +16,70 @@ use Doctrine\ORM\QueryBuilder;
 use Illuminate\Support\Str;
 use Serafim\Hydrogen\Query\Builder;
 use Serafim\Hydrogen\Query\Criterion\Criterion;
+use Serafim\Hydrogen\Query\Processors\CriterionProcessor as CriterionProcessorInterface;
+use Serafim\Hydrogen\Query\Processors\DatabaseProcessor;
+use Serafim\Hydrogen\Query\Processors\Processor;
 
 /**
  * Interface CriterionProcessor
  */
-abstract class CriterionProcessor
+abstract class CriterionProcessor implements CriterionProcessorInterface
 {
     /**
      * @var int
      */
     private static $lastAliasId = 0;
-
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $em;
+    /**
+     * @var ClassMetadata
+     */
+    protected $meta;
     /**
      * @var array
      */
     private $parameters = [];
-
     /**
      * @var string
      */
     private $alias;
 
     /**
-     * @var EntityManagerInterface
+     * @var DatabaseProcessor
      */
-    protected $em;
-
-    /**
-     * @var ClassMetadata
-     */
-    protected $meta;
+    private $processor;
 
     /**
      * BaseCriterion constructor.
+     * @param DatabaseProcessor $processor
      * @param string $alias
      * @param EntityManagerInterface $em
      * @param ClassMetadata $meta
      */
-    public function __construct(string $alias, EntityManagerInterface $em, ClassMetadata $meta)
+    public function __construct(DatabaseProcessor $processor, string $alias, EntityManagerInterface $em, ClassMetadata $meta)
     {
         $this->alias = $alias;
-        $this->em = $em;
-        $this->meta = $meta;
+        $this->em    = $em;
+        $this->meta  = $meta;
+        $this->processor = $processor;
     }
+
+    /**
+     * @return Processor
+     */
+    public function getProcessor(): Processor
+    {
+        return $this->processor;
+    }
+
+    /**
+     * @param Criterion $criterion
+     * @param QueryBuilder $builder
+     * @return QueryBuilder
+     */
+    abstract public function process(Criterion $criterion, $builder): QueryBuilder;
 
     /**
      * @return string
@@ -67,13 +88,6 @@ abstract class CriterionProcessor
     {
         return $this->alias;
     }
-
-    /**
-     * @param Criterion $criterion
-     * @param QueryBuilder $builder
-     * @return QueryBuilder
-     */
-    abstract public function process(Criterion $criterion, QueryBuilder $builder): QueryBuilder;
 
     /**
      * @param string $field
@@ -122,7 +136,7 @@ abstract class CriterionProcessor
      */
     protected function getParameters(): array
     {
-        $parameters = $this->parameters;
+        $parameters       = $this->parameters;
         $this->parameters = [];
 
         return $parameters;

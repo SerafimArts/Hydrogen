@@ -336,17 +336,14 @@ class Builder
     }
 
     /**
-     * @param string[] ...$relations
+     * @param string $relation
+     * @param \Closure|null $then
      * @return Builder
      * @throws \LogicException
      */
-    public function with(string ...$relations): Builder
+    public function with(string $relation, \Closure $then = null): Builder
     {
-        foreach ($relations as $relation) {
-            $this->add(new Relation($relation));
-        }
-
-        return $this;
+        return $this->add(new Relation($relation, $then));
     }
 
     /**

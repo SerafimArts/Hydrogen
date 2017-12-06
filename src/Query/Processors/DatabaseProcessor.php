@@ -52,7 +52,6 @@ class DatabaseProcessor extends BaseProcessor
      * @param EntityManagerInterface $em
      * @param ClassMetadata $meta
      * @param string|null $alias
-     * @throws \Exception
      */
     public function __construct(EntityManagerInterface $em, ClassMetadata $meta, string $alias = null)
     {
@@ -77,6 +76,7 @@ class DatabaseProcessor extends BaseProcessor
     /**
      * @param string $alias
      * @return QueryBuilder
+     * @throws \InvalidArgumentException
      */
     protected function createQueryBuilder(string $alias): QueryBuilder
     {
@@ -125,7 +125,8 @@ class DatabaseProcessor extends BaseProcessor
         // Build query
         //
         foreach ($builder->getCriteria() as $criterion) {
-            $query = $this->getProcessor($criterion)->process($criterion, $query);
+            $query = $this->getCriterionProcessor($criterion)
+                ->process($criterion, $query);
         }
 
         return $query;
@@ -188,6 +189,7 @@ class DatabaseProcessor extends BaseProcessor
     /**
      * @param Builder $builder
      * @return string
+     * @throws \InvalidArgumentException
      */
     public function toSql(Builder $builder): string
     {
@@ -200,7 +202,7 @@ class DatabaseProcessor extends BaseProcessor
      */
     final protected function createProcessor(string $processor): CriterionProcessor
     {
-        return new $processor($this->alias, $this->em, $this->meta);
+        return new $processor($this, $this->alias, $this->em, $this->meta);
     }
 
     /**

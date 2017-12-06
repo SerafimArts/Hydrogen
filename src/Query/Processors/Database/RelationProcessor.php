@@ -26,7 +26,7 @@ class RelationProcessor extends CriterionProcessor
      * @throws MappingException
      * @throws \InvalidArgumentException
      */
-    public function process(Criterion $criterion, QueryBuilder $builder): QueryBuilder
+    public function process(Criterion $criterion, $builder): QueryBuilder
     {
         $mapping = $this->meta->getAssociationMapping($criterion->getRelation());
 

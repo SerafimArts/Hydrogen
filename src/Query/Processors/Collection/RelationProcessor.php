@@ -11,13 +11,20 @@ namespace Serafim\Hydrogen\Query\Processors\Collection;
 
 use Serafim\Hydrogen\Collection;
 use Serafim\Hydrogen\Query\Criterion\Criterion;
+use Serafim\Hydrogen\Query\Criterion\Relation;
 
 /**
  * Class RelationProcessor
  */
 class RelationProcessor extends CriterionProcessor
 {
-    public function process(Criterion $criterion, Collection $collection): Collection
+    /**
+     * @param Criterion|Relation $criterion
+     * @param Collection $collection
+     * @return Collection
+     * @throws \LogicException
+     */
+    public function process(Criterion $criterion, $collection): Collection
     {
         throw new \LogicException(__METHOD__ . ' not implemented yet');
     }

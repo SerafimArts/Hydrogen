@@ -13,11 +13,14 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Serafim\Hydrogen\Collection;
 use Serafim\Hydrogen\Query\Criterion\Criterion;
+use Serafim\Hydrogen\Query\Processors\CollectionProcessor;
+use Serafim\Hydrogen\Query\Processors\CriterionProcessor as CriterionProcessorInterface;
+use Serafim\Hydrogen\Query\Processors\Processor;
 
 /**
  * Class CriterionProcessor
  */
-abstract class CriterionProcessor
+abstract class CriterionProcessor implements CriterionProcessorInterface
 {
     /**
      * @var EntityManagerInterface
@@ -30,14 +33,29 @@ abstract class CriterionProcessor
     protected $meta;
 
     /**
+     * @var CollectionProcessor
+     */
+    private $processor;
+
+    /**
      * CriterionProcessor constructor.
+     * @param CollectionProcessor $processor
      * @param EntityManagerInterface $em
      * @param ClassMetadata $meta
      */
-    public function __construct(EntityManagerInterface $em, ClassMetadata $meta)
+    public function __construct(CollectionProcessor $processor, EntityManagerInterface $em, ClassMetadata $meta)
     {
-        $this->em = $em;
+        $this->em   = $em;
         $this->meta = $meta;
+        $this->processor = $processor;
+    }
+
+    /**
+     * @return Processor
+     */
+    public function getProcessor(): Processor
+    {
+        return $this->processor;
     }
 
     /**
@@ -45,5 +63,5 @@ abstract class CriterionProcessor
      * @param Collection $collection
      * @return Collection
      */
-    abstract public function process(Criterion $criterion, Collection $collection): Collection;
+    abstract public function process(Criterion $criterion, $collection): Collection;
 }

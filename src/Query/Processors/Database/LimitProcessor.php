@@ -23,7 +23,7 @@ class LimitProcessor extends CriterionProcessor
      * @param QueryBuilder $builder
      * @return QueryBuilder
      */
-    public function process(Criterion $criterion, QueryBuilder $builder): QueryBuilder
+    public function process(Criterion $criterion, $builder): QueryBuilder
     {
         return $builder->setMaxResults($criterion->getLimit());
     }

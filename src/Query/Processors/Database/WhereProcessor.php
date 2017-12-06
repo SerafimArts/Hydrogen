@@ -26,7 +26,7 @@ class WhereProcessor extends CriterionProcessor
      * @throws \Exception
      * @throws \InvalidArgumentException
      */
-    public function process(Criterion $criterion, QueryBuilder $builder): QueryBuilder
+    public function process(Criterion $criterion, $builder): QueryBuilder
     {
         $field = $this->fieldName($criterion->getField());
 

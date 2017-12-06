@@ -23,7 +23,7 @@ class LimitProcessor extends CriterionProcessor
      * @param Collection $collection
      * @return Collection
      */
-    public function process(Criterion $criterion, Collection $collection): Collection
+    public function process(Criterion $criterion, $collection): Collection
     {
         return $collection->slice(0, $criterion->getLimit());
     }

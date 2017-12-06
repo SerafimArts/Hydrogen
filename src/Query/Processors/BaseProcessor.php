@@ -97,7 +97,7 @@ abstract class BaseProcessor implements Processor
      * @return DatabaseCriterionProcessor|CollectionCriterionProcessor
      * @throws \InvalidArgumentException
      */
-    protected function getProcessor(Criterion $criterion)
+    protected function getCriterionProcessor(Criterion $criterion)
     {
         $class = \get_class($criterion);
 

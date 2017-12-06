@@ -22,8 +22,9 @@ class GroupByProcessor extends CriterionProcessor
      * @param Criterion|GroupBy $criterion
      * @param QueryBuilder $builder
      * @return QueryBuilder
+     * @throws \InvalidArgumentException
      */
-    public function process(Criterion $criterion, QueryBuilder $builder): QueryBuilder
+    public function process(Criterion $criterion, $builder): QueryBuilder
     {
         $field = $this->fieldName($criterion->getGroupBy());
 

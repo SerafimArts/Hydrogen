@@ -20,12 +20,19 @@ class Relation extends BaseCriterion
     private $relation;
 
     /**
-     * Relation constructor.
-     * @param string $relation
+     * @var \Closure
      */
-    public function __construct(string $relation)
+    private $context;
+
+    /**
+     * Relation constructor.
+     * @param $relation
+     * @param \Closure|null $context
+     */
+    public function __construct($relation, \Closure $context = null)
     {
         $this->relation = $relation;
+        $this->context  = $context ?? function () {};
     }
 
     /**
@@ -34,5 +41,13 @@ class Relation extends BaseCriterion
     public function getRelation(): string
     {
         return $this->relation;
+    }
+
+    /**
+     * @return \Closure
+     */
+    public function getContext(): \Closure
+    {
+        return $this->context;
     }
 }
