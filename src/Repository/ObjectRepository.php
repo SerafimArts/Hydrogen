@@ -14,7 +14,8 @@ use Serafim\Hydrogen\Query\Proxy;
 use Serafim\Hydrogen\Query\Builder;
 
 /**
- * Interface ObjectRepository
+ * @property-read Proxy|Builder|$this $query
+ * @property-read Proxy|Builder|$this $clearQuery
  */
 interface ObjectRepository
 {
@@ -68,4 +69,9 @@ interface ObjectRepository
      * @return Proxy|Builder|$this
      */
     public function query(): Builder;
+
+    /**
+     * @return Proxy|Builder|$this
+     */
+    public function clearQuery(): Builder;
 }

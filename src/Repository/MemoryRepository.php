@@ -9,46 +9,21 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Repository;
 
-use Doctrine\Common\Persistence\Mapping\ClassMetadata as ClassMetadataInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Serafim\Hydrogen\Collection;
-use Serafim\Hydrogen\Query\Builder;
-use Serafim\Hydrogen\Query\Processors\CollectionProcessor;
+use Doctrine\ORM\EntityManagerInterface;
 use Serafim\Hydrogen\Query\Processors\Processor;
-use Serafim\Hydrogen\Query\Proxy;
+use Serafim\Hydrogen\Query\Processors\CollectionProcessor;
 
 /**
  * Class MemoryRepository
  */
-abstract class MemoryRepository implements ObjectRepository
+abstract class MemoryRepository extends Repository
 {
-    /**
-     * @var ClassMetadata|ClassMetadataInterface
-     */
-    private $meta;
-
-    /**
-     * @var Processor
-     */
-    private $processor;
-
-    /**
-     * ArrayRepository constructor.
-     * @param EntityManagerInterface $em
-     * @param ClassMetadata $meta
-     */
-    public function __construct(EntityManagerInterface $em, ClassMetadata $meta)
-    {
-        $this->meta = $meta;
-        $this->processor = $this->getProcessor($em);
-    }
-
     /**
      * @param EntityManagerInterface $em
      * @return Processor
      */
-    private function getProcessor(EntityManagerInterface $em): Processor
+    protected function getProcessor(EntityManagerInterface $em): Processor
     {
         $data = new Collection($this->getData());
 
@@ -56,72 +31,7 @@ abstract class MemoryRepository implements ObjectRepository
     }
 
     /**
-     * @param int|string $id
-     * @return null|object
-     * @throws \LogicException
-     */
-    public function find($id)
-    {
-        $primary = \array_first($this->meta->getIdentifierFieldNames());
-
-        $query = (new Builder())->where($primary, $id);
-
-        return $this->processor->first($query);
-    }
-
-    /**
      * @return iterable|object[]
      */
     abstract protected function getData(): iterable;
-
-    /**
-     * @return Collection
-     */
-    public function findAll(): Collection
-    {
-        return $this->processor->get(new Builder());
-    }
-
-    /**
-     * @param Builder $query
-     * @return null|object
-     */
-    public function findOneBy(Builder $query)
-    {
-        return $this->processor->first($query);
-    }
-
-    /**
-     * @param Builder $query
-     * @return Collection
-     */
-    public function findBy(Builder $query): Collection
-    {
-        return $this->processor->get($query);
-    }
-
-    /**
-     * @param Builder $query
-     * @return int
-     */
-    public function count(Builder $query): int
-    {
-        return $this->processor->count($query);
-    }
-
-    /**
-     * @return Builder|Proxy|$this
-     */
-    public function query(): Builder
-    {
-        return (new Proxy($this))->scope($this);
-    }
-
-    /**
-     * @return string
-     */
-    public function getClassName(): string
-    {
-        return $this->meta->getName();
-    }
 }

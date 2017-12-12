@@ -24,6 +24,7 @@
     - [Selections](#selections)
     - ["In-place" queries](#in-place-queries)
     - [Scopes](#scopes)
+    - [Global Scopes](#global-scopes)
 - [Collections](#collections)
     - [Higher Order Messaging](#higher-order-messaging)
     - [Static constructors](#static-constructors)
@@ -350,6 +351,56 @@ Or
 $query = Query::new()->scope(SomeClass::class, AnyClass::class, $scopes);
 ```
 
+### Global Scopes
+
+Sometimes it happens that every request to the database should be accompanied by 
+some sort of sampling criteria. In such cases, you should use the global scopes:
+
+```php
+class UsersRepository extends DatabaseRepository
+{
+    protected function scope(Builder $query): Builder
+    {
+        return $query->whereNotNull('deletedAt');
+    }
+    
+    public function findNewest(): Collection
+    {
+        return $this->findBy(Query::latest('createdAt'));
+    }
+}
+
+//
+// Returns the collection of users for which the field "deletedAt" 
+// is not equal to NULL.
+//
+// Note that the "scope()" method is called automatically for any 
+// request in the repository.
+// 
+$users->findNewest(); // SELECT a FROM b WHERE deleted_at NOT NULL ORDER BY created_at;
+```
+
+In cases where you want to make a request explicitly and 
+ignore the base query settings (global scopes) - 
+it's worth using "clearQuery()" method.
+
+```php
+class UsersRepository extends DatabaseRepository
+{
+    protected function scope(Builder $query): Builder
+    {
+        return $query->whereNotNull('deletedAt');
+    }
+    
+    public function findAllWithDeleted(): Collection
+    {
+        return $this->clearQuery()->get();
+    }
+}
+
+$users->findAll();            // SELECT a FROM b WHERE deleted_at NOT NULL
+$users->findAllWithDeleted(); // SELECT a FROM b
+```
 
 ## Collections
 
