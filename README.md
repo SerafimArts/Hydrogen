@@ -14,6 +14,7 @@
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Queries](#queries)
+    - [Non-prefixed queries](#non-prefixed-queries)
     - [Eager loading](#eager-loading)
     - [Relation selection](#relation-selection)
 - [Repositories](#repositories)
@@ -51,6 +52,7 @@ and has a set of the following methods.
 
 ```php
 Query::new()
+    ->select('field', 'RAND() as any')  // SELECT [entity], [relations], field, RAND() as any
     ->where('field', 23)                // WHERE field = 23
     ->where('field', '>', 42)           // WHERE field > 42
     ->whereIn('field', [1, 2, 3])       // WHERE field IN (1, 2, 3)
@@ -86,7 +88,14 @@ Query::new()
     ->orderBy('updatedAt');
 /**
  * Result:
- * "SELECT ... FROM ... WHERE id = 23 OR id > 42 OR id IN (1, 3, 5) ORDER BY created_at ASC, updated_at ASC"
+ *
+ * SELECT entity FROM ... 
+ * WHERE entity.id = 23 OR 
+ *       entity.id > 42 OR 
+ *       entity.id IN (1, 3, 5) 
+ * ORDER BY 
+ *      entity.created_at ASC, 
+ *      entity.updated_at ASC;
  */
  
 // Alternatively, you can use the following variant:
@@ -96,6 +105,20 @@ Query::where('id', 23)
     ->or->where('id', [1, 3, 5])
     ->asc('createdAt', 'updatedAt');
  
+```
+
+### Non-prefixed queries
+
+In some cases, you need to get a custom value that does not apply to the 
+entity itself. In this case, you should use the prefix `this.` in the queries.
+
+```php
+Query::select('RAND() as HIDDEN rnd')
+    ->orderBy('this.rnd', 'createdAt')
+    ->get();
+/**
+ * SELECT entity, RAND() as HIDDEN rnd FROM ... ORDER BY entity.created_at ASC, rnd ASC
+ */
 ```
 
 ### Eager loading

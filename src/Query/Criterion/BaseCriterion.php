@@ -9,13 +9,6 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Query\Criterion;
 
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Query\Expr;
-use Doctrine\ORM\QueryBuilder;
-use Illuminate\Support\Str;
-use Serafim\Hydrogen\Collection;
-use Serafim\Hydrogen\Query\Builder;
-
 /**
  * Class BaseCriterion
  */

@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Serafim\Hydrogen\Query;
 
-use Illuminate\Support\Str;
 use Serafim\Hydrogen\Collection;
 use Serafim\Hydrogen\Repository\ObjectRepository;
 

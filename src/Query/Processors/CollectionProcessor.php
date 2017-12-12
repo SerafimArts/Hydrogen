@@ -19,6 +19,7 @@ use Serafim\Hydrogen\Query\Criterion\Limit;
 use Serafim\Hydrogen\Query\Criterion\Offset;
 use Serafim\Hydrogen\Query\Criterion\OrderBy;
 use Serafim\Hydrogen\Query\Criterion\Relation;
+use Serafim\Hydrogen\Query\Criterion\Select;
 use Serafim\Hydrogen\Query\Criterion\Where;
 use Serafim\Hydrogen\Query\Heuristics\Heuristic;
 use Serafim\Hydrogen\Query\Heuristics\WhereIn;
@@ -28,6 +29,7 @@ use Serafim\Hydrogen\Query\Processors\Collection\LimitProcessor;
 use Serafim\Hydrogen\Query\Processors\Collection\OffsetProcessor;
 use Serafim\Hydrogen\Query\Processors\Collection\OrderByProcessor;
 use Serafim\Hydrogen\Query\Processors\Collection\RelationProcessor;
+use Serafim\Hydrogen\Query\Processors\Collection\SelectionProcessor;
 use Serafim\Hydrogen\Query\Processors\Collection\WhereProcessor;
 
 /**
@@ -53,7 +55,7 @@ class CollectionProcessor extends BaseProcessor
      */
     public function __construct(Collection $items, EntityManagerInterface $em, ClassMetadata $meta)
     {
-        $this->items = $items;
+        $this->items    = $items;
         $this->hydrator = new ArrayHydrator($em, $meta);
         parent::__construct($em, $meta);
     }
@@ -134,6 +136,7 @@ class CollectionProcessor extends BaseProcessor
             OrderBy::class  => OrderByProcessor::class,
             Relation::class => RelationProcessor::class,
             Where::class    => WhereProcessor::class,
+            Select::class   => SelectionProcessor::class,
         ];
     }
 

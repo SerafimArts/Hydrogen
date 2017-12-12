@@ -12,10 +12,12 @@ namespace Serafim\Hydrogen;
 use Serafim\Hydrogen\Query\Proxy;
 use Serafim\Hydrogen\Query\Builder;
 use Serafim\Hydrogen\Query\Criterion\Criterion;
+use Serafim\Hydrogen\Query\Raw;
 use Serafim\Hydrogen\Repository\ObjectRepository;
 
 /**
  * @method static Builder add(Criterion $criterion)
+ * @method static Builder select(string ...$fields)
  * @method static Builder where(string $field, $valueOrOperator, $value = null)
  * @method static Builder orWhere(string $field, $valueOrOperator, $value = null)
  * @method static Builder whereBetween(string $field, $from, $to)

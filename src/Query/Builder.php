@@ -16,6 +16,7 @@ use Serafim\Hydrogen\Query\Criterion\Limit;
 use Serafim\Hydrogen\Query\Criterion\Offset;
 use Serafim\Hydrogen\Query\Criterion\OrderBy;
 use Serafim\Hydrogen\Query\Criterion\Relation;
+use Serafim\Hydrogen\Query\Criterion\Select;
 use Serafim\Hydrogen\Query\Criterion\Where;
 
 /**
@@ -116,6 +117,21 @@ class Builder
         $this->thenOr = false;
 
         return $result;
+    }
+
+
+    /**
+     * @param string[] ...$fields
+     * @return Builder
+     * @throws \LogicException
+     */
+    public function select(string ...$fields): self
+    {
+        foreach ($fields as $field) {
+            $this->add(new Select($field));
+        }
+
+        return $this;
     }
 
     /**

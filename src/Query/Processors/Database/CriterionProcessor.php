@@ -26,6 +26,11 @@ use Serafim\Hydrogen\Query\Processors\Processor;
 abstract class CriterionProcessor implements CriterionProcessorInterface
 {
     /**
+     *
+     */
+    public const RAW_SELECTION_PREFIX = 'this.';
+
+    /**
      * @var int
      */
     private static $lastAliasId = 0;
@@ -132,6 +137,10 @@ abstract class CriterionProcessor implements CriterionProcessorInterface
      */
     protected function fieldName(string $field, string $alias = null): string
     {
+        if (Str::startsWith($field, static::RAW_SELECTION_PREFIX)) {
+            return Str::replaceFirst(static::RAW_SELECTION_PREFIX, '', $field);
+        }
+
         return Builder::fieldName($field, $alias ?? $this->alias);
     }
 

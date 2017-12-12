@@ -21,6 +21,7 @@ use Serafim\Hydrogen\Query\Criterion\Limit;
 use Serafim\Hydrogen\Query\Criterion\Offset;
 use Serafim\Hydrogen\Query\Criterion\OrderBy;
 use Serafim\Hydrogen\Query\Criterion\Relation;
+use Serafim\Hydrogen\Query\Criterion\Select;
 use Serafim\Hydrogen\Query\Criterion\Where;
 use Serafim\Hydrogen\Query\Heuristics\Heuristic;
 use Serafim\Hydrogen\Query\Heuristics\WhereIn;
@@ -30,6 +31,7 @@ use Serafim\Hydrogen\Query\Processors\Database\LimitProcessor;
 use Serafim\Hydrogen\Query\Processors\Database\OffsetProcessor;
 use Serafim\Hydrogen\Query\Processors\Database\OrderByProcessor;
 use Serafim\Hydrogen\Query\Processors\Database\RelationProcessor;
+use Serafim\Hydrogen\Query\Processors\Database\SelectionProcessor;
 use Serafim\Hydrogen\Query\Processors\Database\WhereProcessor;
 
 /**
@@ -69,22 +71,8 @@ class DatabaseProcessor extends BaseProcessor
     {
         return \vsprintf('%s_%s', [
             Str::snake(\class_basename($seed ?? $meta->getName())),
-            ++self::$lastSelectionId
+            ++self::$lastSelectionId,
         ]);
-    }
-
-    /**
-     * @param string $alias
-     * @return QueryBuilder
-     * @throws \InvalidArgumentException
-     */
-    protected function createQueryBuilder(string $alias): QueryBuilder
-    {
-        $builder = new QueryBuilder($this->em);
-        $builder->select($alias);
-        $builder->from($this->meta->getName(), $alias);
-
-        return $builder;
     }
 
     /**
@@ -109,6 +97,20 @@ class DatabaseProcessor extends BaseProcessor
         $query = $this->createQueryBuilder($this->alias);
 
         return $this->applyQueryBuilder($query, $builder);
+    }
+
+    /**
+     * @param string $alias
+     * @return QueryBuilder
+     * @throws \InvalidArgumentException
+     */
+    protected function createQueryBuilder(string $alias): QueryBuilder
+    {
+        $builder = new QueryBuilder($this->em);
+        $builder->select($alias);
+        $builder->from($this->meta->getName(), $alias);
+
+        return $builder;
     }
 
     /**
@@ -227,6 +229,7 @@ class DatabaseProcessor extends BaseProcessor
             OrderBy::class  => OrderByProcessor::class,
             Relation::class => RelationProcessor::class,
             Where::class    => WhereProcessor::class,
+            Select::class   => SelectionProcessor::class,
         ];
     }
 
