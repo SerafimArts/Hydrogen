@@ -27,29 +27,3 @@ namespace {
         \define('_', \Serafim\Hydrogen\Collection\HigherOrderCollectionProxy::PATTERN);
     }
 }
-
-namespace Serafim\Hydrogen {
-
-    use Serafim\Hydrogen\Query\Builder;
-
-    if (! \function_exists('\\Serafim\\Hydrogen\\Collection')) {
-        /**
-         * @param iterable $items
-         * @return Collection
-         */
-        function Collection($items): Collection
-        {
-            return new Collection($items);
-        }
-    }
-
-    if (! \function_exists('\\Serafim\\Hydrogen\\Query')) {
-        /**
-         * @return Builder
-         */
-        function Query(): Builder
-        {
-            return Query::new();
-        }
-    }
-}

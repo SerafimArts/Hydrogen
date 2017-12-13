@@ -489,18 +489,6 @@ $example3 = Collection::make($data)
     ->toArray();
 ```
 
-### Static constructors
-
-You can create collections (and queries) without using the keyword "new". 
-Why do I need it - I do not know, but it looks cool =)
-
-```php
-use Serafim\Hydrogen\Collection;
-
-$collection = Collection(...);
-// Is alias of "new Collection(...)"
-```
-
 ### Destructuring
 
 ```php
