@@ -11,7 +11,6 @@ namespace Serafim\Hydrogen;
 
 use Illuminate\Support\Collection as BaseCollection;
 use Serafim\Hydrogen\Collection\HigherOrderCollectionProxy;
-use Doctrine\Common\Collections\Collection as CollectionInterface;
 
 /**
  * @property-read HigherOrderCollectionProxy $average
@@ -29,8 +28,10 @@ use Doctrine\Common\Collections\Collection as CollectionInterface;
  * @property-read HigherOrderCollectionProxy $sortBy
  * @property-read HigherOrderCollectionProxy $sortByDesc
  * @property-read HigherOrderCollectionProxy $sum
+ *
+ * @mixin \Doctrine\Common\Collections\Collection
  */
-class Collection extends BaseCollection implements CollectionInterface
+class Collection extends BaseCollection
 {
     /**
      * @param string $key
@@ -46,7 +47,6 @@ class Collection extends BaseCollection implements CollectionInterface
 
         return new HigherOrderCollectionProxy($this, $key);
     }
-
     /**
      * Adds an element at the end of the collection.
      *
