@@ -31,7 +31,8 @@
     - [Static constructors](#static-constructors)
     - [Destructuring](#destructuring)
 - [Heuristic algorithms](#heuristic-algorithms)
-    - [WHERE IN](#where-in)
+    - ["WHERE IN" Optimizations](#where-in-optimisations)
+    - [Removing duplicate relations](#duplicate-relations)
 
 This package contains a set of frequently used functions of Doctrine ORM 
 that are optimized for more convenient usage.
@@ -533,7 +534,9 @@ only one element replaces "`WHERE A IN (B)`" with "`WHERE A = B`".
 ```php
 Query::whereIn('some', [1, 2, 3]);
 // > "... WHERE `some` IN (1, 2, 3)"
+```
 
+```php
 Query::whereIn('some', [1]);
 // > "... WHERE `some` = 1"
 ```
@@ -546,4 +549,22 @@ sql> SELECT * FROM example WHERE id IN (1)
 
 sql> SELECT * FROM example WHERE id = 1
 # 1 row retrieved starting from 1 in 15ms (execution: 8ms, fetching: 7ms)
+```
+
+### Duplicate relations
+
+This optimization determines that somewhere 
+in the chain of requests there is a duplication 
+of "greedy relations loading" with the **same arguments** and excludes it from the query.
+
+```php
+Query::with('relation')->with('relation');
+// In this case, only one relation will be left.
+```
+
+```php
+Query::with('relation')->with('relation', function(Builder $query) {
+    return $query->where('field', 23);
+});
+// In this case, no transformations will be made.
 ```

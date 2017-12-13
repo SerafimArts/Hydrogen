@@ -7,7 +7,7 @@
  */
 declare(strict_types=1);
 
-namespace Serafim\Hydrogen\Query\Heuristics;
+namespace Serafim\Hydrogen\Heuristics;
 
 use Serafim\Hydrogen\Query\Builder;
 
@@ -20,5 +20,5 @@ interface Heuristic
      * @param Builder $builder
      * @return Builder
      */
-    public function optimiseQuery(Builder $builder): Builder;
+    public function before(Builder $builder): Builder;
 }

@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\EntityManagerInterface;
 use Serafim\Hydrogen\Query\Builder;
 use Serafim\Hydrogen\Criteria\Criterion;
-use Serafim\Hydrogen\Query\Heuristics\Heuristic;
+use Serafim\Hydrogen\Heuristics;
 use Serafim\Hydrogen\Processors\Database\CriterionProcessor as DatabaseCriterionProcessor;
 use Serafim\Hydrogen\Processors\Collection\CriterionProcessor as CollectionCriterionProcessor;
 
@@ -28,7 +28,7 @@ abstract class BaseProcessor implements Processor
     private $processors = [];
 
     /**
-     * @var array|Heuristic[]
+     * @var array|Heuristics\Heuristic[]
      */
     private $heuristics = [];
 
@@ -90,9 +90,15 @@ abstract class BaseProcessor implements Processor
     abstract protected function getProcessorMappings(): iterable;
 
     /**
-     * @return iterable|Heuristic[]|string[]
+     * @return iterable|Heuristics\Heuristic[]|string[]
      */
-    abstract protected function getHeuristics(): iterable;
+    protected function getHeuristics(): iterable
+    {
+        return [
+            Heuristics\WhereIn::class,
+            Heuristics\UniqueRelations::class,
+        ];
+    }
 
     /**
      * @param Criterion $criterion
@@ -119,8 +125,9 @@ abstract class BaseProcessor implements Processor
      */
     public function optimiseQuery(Builder $query): Builder
     {
+        /** @var Heuristic $heuristic */
         foreach ($this->heuristics as $heuristic) {
-            $query = $heuristic->optimiseQuery($query);
+            $query = $heuristic->before($query);
         }
 
         return $query;

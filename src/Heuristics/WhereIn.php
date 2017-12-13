@@ -7,33 +7,29 @@
  */
 declare(strict_types=1);
 
-namespace Serafim\Hydrogen\Query\Heuristics;
+namespace Serafim\Hydrogen\Heuristics;
 
-use Serafim\Hydrogen\Query\Builder;
 use Serafim\Hydrogen\Criteria\Where;
+use Serafim\Hydrogen\Query\Builder;
 
 /**
  * Class WhereIn
  */
-class WhereIn implements Heuristic
+class WhereIn extends BaseHeuristic
 {
     /**
      * @param Builder $builder
      * @return Builder
      */
-    public function optimiseQuery(Builder $builder): Builder
+    public function before(Builder $builder): Builder
     {
-        foreach ($builder->getCriteria() as $criterion) {
-            if ($criterion instanceof Where) {
-                if ($criterion->getOperator() === Where::OPERATOR_IN) {
-                    $this->optimiseSingleValueWhereIn($builder, $criterion);
-                } elseif ($criterion->getOperator() === Where::OPERATOR_NOT_IN) {
-                    $this->optimiseSingleValueWhereNotIn($builder, $criterion);
-                }
+        return $this->match($builder, Where::class, function (Where $where) use ($builder) {
+            if ($where->getOperator() === Where::OPERATOR_IN) {
+                $this->optimiseSingleValueWhereIn($builder, $where);
+            } elseif ($where->getOperator() === Where::OPERATOR_NOT_IN) {
+                $this->optimiseSingleValueWhereNotIn($builder, $where);
             }
-        }
-
-        return $builder;
+        });
     }
 
     /**

@@ -28,8 +28,8 @@ use Serafim\Hydrogen\Processors\Collection\RelationProcessor;
 use Serafim\Hydrogen\Processors\Collection\SelectionProcessor;
 use Serafim\Hydrogen\Processors\Collection\WhereProcessor;
 use Serafim\Hydrogen\Query\Builder;
-use Serafim\Hydrogen\Query\Heuristics\Heuristic;
-use Serafim\Hydrogen\Query\Heuristics\WhereIn;
+use Serafim\Hydrogen\Heuristics\Heuristic;
+use Serafim\Hydrogen\Heuristics\WhereIn;
 use Serafim\Hydrogen\Query\Hydrator\ArrayHydrator;
 
 /**
@@ -156,8 +156,8 @@ class CollectionProcessor extends BaseProcessor
      */
     final protected function getHeuristics(): iterable
     {
-        return [
-            WhereIn::class,
-        ];
+        return \array_merge([
+            //
+        ], parent::getHeuristics());
     }
 }

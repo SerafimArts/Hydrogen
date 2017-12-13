@@ -25,6 +25,11 @@ class Relation extends BaseCriterion
     private $context;
 
     /**
+     * @var bool
+     */
+    private $hasContext;
+
+    /**
      * Relation constructor.
      * @param $relation
      * @param \Closure|null $context
@@ -33,6 +38,15 @@ class Relation extends BaseCriterion
     {
         $this->relation = $relation;
         $this->context  = $context ?? function () {};
+        $this->hasContext = $context !== null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasContext(): bool
+    {
+        return $this->hasContext;
     }
 
     /**
