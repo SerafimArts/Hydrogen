@@ -54,7 +54,7 @@ and has a set of the following methods.
 
 ```php
 Query::new()
-    ->select('field', 'RAND() as any')  // SELECT [entity], [relations], field, RAND() as any
+    ->select('some', 'any')             // SELECT [entity], [relations], some, any
     ->where('field', 23)                // WHERE field = 23
     ->where('field', '>', 42)           // WHERE field > 42
     ->whereIn('field', [1, 2, 3])       // WHERE field IN (1, 2, 3)
@@ -75,8 +75,7 @@ Query::new()
     ->skip(10)                          // OFFSET 10
     ->offset(10)                        // (alias) OFFSET 10
     ->range(100, 150)                   // LIMIT 50 OFFSET 100
-    ->with('relation')                  // Relation "relation" eager loading
-    
+    ->with('rel', [\Closure $op])       // Eager loading of "rel" relation with "$op" criterion
 ```
 
 Another example:
