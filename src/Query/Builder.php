@@ -10,14 +10,14 @@ declare(strict_types=1);
 namespace Serafim\Hydrogen\Query;
 
 use Illuminate\Support\Str;
-use Serafim\Hydrogen\Query\Criterion\Criterion;
-use Serafim\Hydrogen\Query\Criterion\GroupBy;
-use Serafim\Hydrogen\Query\Criterion\Limit;
-use Serafim\Hydrogen\Query\Criterion\Offset;
-use Serafim\Hydrogen\Query\Criterion\OrderBy;
-use Serafim\Hydrogen\Query\Criterion\Relation;
-use Serafim\Hydrogen\Query\Criterion\Select;
-use Serafim\Hydrogen\Query\Criterion\Where;
+use Serafim\Hydrogen\Criteria\Criterion;
+use Serafim\Hydrogen\Criteria\GroupBy;
+use Serafim\Hydrogen\Criteria\Limit;
+use Serafim\Hydrogen\Criteria\Offset;
+use Serafim\Hydrogen\Criteria\OrderBy;
+use Serafim\Hydrogen\Criteria\Relation;
+use Serafim\Hydrogen\Criteria\Select;
+use Serafim\Hydrogen\Criteria\Where;
 
 /**
  * Class Builder

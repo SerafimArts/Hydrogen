@@ -11,8 +11,8 @@ namespace Serafim\Hydrogen\Repository;
 
 use Serafim\Hydrogen\Collection;
 use Doctrine\ORM\EntityManagerInterface;
-use Serafim\Hydrogen\Query\Processors\Processor;
-use Serafim\Hydrogen\Query\Processors\CollectionProcessor;
+use Serafim\Hydrogen\Processors\Processor;
+use Serafim\Hydrogen\Processors\CollectionProcessor;
 
 /**
  * Class MemoryRepository

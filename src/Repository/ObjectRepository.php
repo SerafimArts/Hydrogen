@@ -10,14 +10,12 @@ declare(strict_types=1);
 namespace Serafim\Hydrogen\Repository;
 
 use Serafim\Hydrogen\Collection;
-use Serafim\Hydrogen\Query\Proxy;
 use Serafim\Hydrogen\Query\Builder;
 
 /**
- * @property-read Proxy|Builder|$this $query
- * @property-read Proxy|Builder|$this $clearQuery
+ * Interface ObjectRepository
  */
-interface ObjectRepository
+interface ObjectRepository extends Selectable
 {
     /**
      * Finds an object by its primary key / identifier.
@@ -64,14 +62,4 @@ interface ObjectRepository
      * @return string
      */
     public function getClassName(): string;
-
-    /**
-     * @return Proxy|Builder|$this
-     */
-    public function query(): Builder;
-
-    /**
-     * @return Proxy|Builder|$this
-     */
-    public function clearQuery(): Builder;
 }

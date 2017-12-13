@@ -14,7 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Serafim\Hydrogen\Collection;
 use Serafim\Hydrogen\Query\Builder;
-use Serafim\Hydrogen\Query\Processors\Processor;
+use Serafim\Hydrogen\Processors\Processor;
 use Serafim\Hydrogen\Query\Proxy;
 
 /**

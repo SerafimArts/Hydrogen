@@ -11,8 +11,7 @@ namespace Serafim\Hydrogen;
 
 use Serafim\Hydrogen\Query\Proxy;
 use Serafim\Hydrogen\Query\Builder;
-use Serafim\Hydrogen\Query\Criterion\Criterion;
-use Serafim\Hydrogen\Query\Raw;
+use Serafim\Hydrogen\Criteria\Criterion;
 use Serafim\Hydrogen\Repository\ObjectRepository;
 
 /**

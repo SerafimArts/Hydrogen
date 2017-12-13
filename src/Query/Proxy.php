@@ -15,7 +15,7 @@ use Serafim\Hydrogen\Repository\ObjectRepository;
 /**
  * Class Proxy
  */
-class Proxy extends Builder
+class Proxy extends Builder implements Selectable
 {
     /**
      * @var ObjectRepository

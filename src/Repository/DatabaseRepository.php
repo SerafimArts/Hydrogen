@@ -11,8 +11,8 @@ namespace Serafim\Hydrogen\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Serafim\Hydrogen\Query\Builder;
-use Serafim\Hydrogen\Query\Processors\DatabaseProcessor;
-use Serafim\Hydrogen\Query\Processors\Processor;
+use Serafim\Hydrogen\Processors\DatabaseProcessor;
+use Serafim\Hydrogen\Processors\Processor;
 
 /**
  * Class DatabaseRepository

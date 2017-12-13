@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Serafim\Hydrogen\Query\Processors;
+namespace Serafim\Hydrogen\Processors;
 
-use Serafim\Hydrogen\Query\Criterion\Criterion;
+use Serafim\Hydrogen\Criteria\Criterion;
 
 /**
  * Interface CriterionProcessor
