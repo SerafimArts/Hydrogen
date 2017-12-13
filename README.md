@@ -179,10 +179,6 @@ $children->findAll($query);
  */
 ```
 
-Beethooven approves.
-
-![https://habrastorage.org/webt/lf/hw/dn/lfhwdnvjxlt9vrsbrd_ajpitubc.png](https://habrastorage.org/webt/lf/hw/dn/lfhwdnvjxlt9vrsbrd_ajpitubc.png)
-
 ### Relation selection
 
 You can add sample criteria for relationships using the second argument of the `with` method.
@@ -556,3 +552,11 @@ Query::with('relation')->with('relation', function(Builder $query) {
 });
 // In this case, no transformations will be made.
 ```
+
+
+--------------------
+
+
+Beethooven approves.
+
+![https://habrastorage.org/webt/lf/hw/dn/lfhwdnvjxlt9vrsbrd_ajpitubc.png](https://habrastorage.org/webt/lf/hw/dn/lfhwdnvjxlt9vrsbrd_ajpitubc.png)
