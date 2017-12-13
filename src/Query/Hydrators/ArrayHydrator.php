@@ -7,12 +7,13 @@
  */
 declare(strict_types=1);
 
-namespace Serafim\Hydrogen\Query\Collection;
+namespace Serafim\Hydrogen\Query\Hydrator;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\Common\Collections\Collection as CollectionInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Serafim\Hydrogen\Collection;
 
 /**
  * Class ArrayHydrator
@@ -36,7 +37,7 @@ class ArrayHydrator
      */
     public function __construct(EntityManagerInterface $em, ClassMetadata $meta)
     {
-        $this->em = $em;
+        $this->em   = $em;
         $this->meta = $meta;
     }
 
@@ -114,6 +115,45 @@ class ArrayHydrator
         }
     }
 
+    /**
+     * @param string $property
+     * @param array $mappings
+     * @return string
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    private function getJoinColumnOf(string $property, array $mappings): string
+    {
+        // Direct relation
+        if (\array_key_exists('joinColumns', $mappings)) {
+            return \array_first($mappings['joinColumns'])['name'];
+        }
+
+        // Inverse relation
+        $target      = $this->em->getClassMetadata($mappings['targetEntity']);
+        $association = $target->getAssociationMapping($mappings['mappedBy']);
+        $column      = \array_first($association['joinColumns'])['referencedColumnName'];
+
+        if ($column === null) {
+            $error = \sprintf('Relation %s must contain join column definition.', $property);
+            throw new \LogicException($error);
+        }
+
+        return $column;
+    }
+
+    /**
+     * @param array $mapping
+     * @return bool
+     */
+    private function isToOne(array $mapping): bool
+    {
+        // TODO: Change to bit mask usage
+        return \in_array($mapping['type'] ?? null, [
+            ClassMetadataInfo::ONE_TO_ONE,
+            ClassMetadataInfo::MANY_TO_ONE,
+        ], true);
+    }
 
     /**
      * @param object $entity
@@ -133,39 +173,6 @@ class ArrayHydrator
         $this->meta->setFieldValue($entity, $mappings['fieldName'], $relation);
     }
 
-
-    /**
-     * @param object $entity
-     * @param array $mappings
-     * @param string|int $value
-     * @return void
-     * @throws \LogicException
-     */
-    private function loadCollectionRelation($entity, array $mappings, $value): void
-    {
-        if ($value === null) {
-            // Empty collection
-            $this->meta->setFieldValue($entity, $mappings['fieldName'], new ArrayCollection([]));
-            return;
-        }
-
-        throw new \LogicException(__METHOD__ . ' not implemented yet');
-    }
-
-
-    /**
-     * @param array $mapping
-     * @return bool
-     */
-    private function isToOne(array $mapping): bool
-    {
-        // TODO: Change to bit mask usage
-        return \in_array($mapping['type'] ?? null, [
-            ClassMetadataInfo::ONE_TO_ONE,
-            ClassMetadataInfo::MANY_TO_ONE,
-        ], true);
-    }
-
     /**
      * @param array $mapping
      * @return bool
@@ -180,32 +187,32 @@ class ArrayHydrator
     }
 
     /**
-     * @param string $property
+     * @param object $entity
      * @param array $mappings
-     * @return string
+     * @param string|int $value
+     * @return void
      * @throws \LogicException
-     * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    private function getJoinColumnOf(string $property, array $mappings): string
+    private function loadCollectionRelation($entity, array $mappings, $value): void
     {
-        // Direct relation
-        if (\array_key_exists('joinColumns', $mappings)) {
-            return \array_first($mappings['joinColumns'])['name'];
+        if ($value === null) {
+            // Empty collection
+            $this->meta->setFieldValue($entity, $mappings['fieldName'], $this->bootToManyRelation($entity));
+
+            return;
         }
 
-        // Inverse relation
-        $target = $this->em->getClassMetadata($mappings['targetEntity']);
-        $association = $target->getAssociationMapping($mappings['mappedBy']);
-        $column = \array_first($association['joinColumns'])['referencedColumnName'];
-
-        if ($column === null) {
-            $error = \sprintf('Relation %s must contain join column definition.', $property);
-            throw new \LogicException($error);
-        }
-
-        return $column;
+        throw new \LogicException(__METHOD__ . ' not implemented yet');
     }
 
+    /**
+     * @param string $entity
+     * @return CollectionInterface
+     */
+    protected function bootToManyRelation(string $entity): CollectionInterface
+    {
+        return new Collection([]);
+    }
 
     /**
      * @param object $entity
@@ -222,7 +229,7 @@ class ArrayHydrator
             $sub = $this->em->getClassMetadata($mappings['class']);
 
             $columnPrefix = $prefix . (string)$mappings['columnPrefix'];
-            $instance = $this->hydrateObject($sub->newInstance(), $sub, $data, $columnPrefix);
+            $instance     = $this->hydrateObject($sub->newInstance(), $sub, $data, $columnPrefix);
 
             $meta->setFieldValue($entity, $field, $instance);
         }
