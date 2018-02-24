@@ -411,10 +411,9 @@ class Builder
         return $this;
     }
 
-
     /**
      * @param string $method
-     * @return |null
+     * @return \Closure|null
      */
     private function getScopeMethod(string $method): ?\Closure
     {
@@ -425,6 +424,8 @@ class Builder
                 return \Closure::fromCallable([$context, $action]);
             }
         }
+
+        return null;
     }
 
     /**
