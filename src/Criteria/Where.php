@@ -77,6 +77,8 @@ class Where extends BaseCriterion
      */
     public function __construct(string $field, $operatorOrValue, $value = null, bool $and = true)
     {
+        $operatorOrValue = self::normalizeOperator($operatorOrValue);
+
         [$this->field, $this->operator, $this->value, $this->and] = [$field, $operatorOrValue, $value, $and];
 
         $this->normalizeParameters();
@@ -123,21 +125,28 @@ class Where extends BaseCriterion
     }
 
     /**
-     * @param string $field
-     * @param $operatorOrValue
+     * @param mixed $operatorOrValue
      * @param null $value
      * @return array
      */
-    public static function normalize(string $field, $operatorOrValue, $value = null): array
+    public static function completeMissingParameters($operatorOrValue, $value = null): array
     {
         if ($value === null) {
             [$value, $operatorOrValue] = [$operatorOrValue, '='];
         }
 
-        $operator = Str::lower($operatorOrValue);
-        $operator = self::OPERATOR_MAPPINGS[$operator] ?? $operator;
+        return [$operatorOrValue, $value];
+    }
 
-        return [$field, $operator, $value];
+    /**
+     * @param mixed $operatorOrValue
+     * @return string
+     */
+    public static function normalizeOperator($operatorOrValue): string
+    {
+        $operator = Str::lower($operatorOrValue);
+
+        return self::OPERATOR_MAPPINGS[$operator] ?? $operator;
     }
 
     /**

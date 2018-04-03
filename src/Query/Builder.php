@@ -101,7 +101,7 @@ class Builder
      */
     public function where(string $field, $valueOrOperator, $value = null): Builder
     {
-        [$field, $valueOrOperator, $value] = Where::normalize($field, $valueOrOperator, $value);
+        [$valueOrOperator, $value] = Where::completeMissingParameters($valueOrOperator, $value);
 
         $query = new Where($field, $valueOrOperator, $value, $this->mode());
 
@@ -235,7 +235,7 @@ class Builder
 
     /**
      * @param string $field
-     * @param iterable $value
+     * @param iterable|array $value
      * @return Builder|static|$this
      * @throws \LogicException
      */
