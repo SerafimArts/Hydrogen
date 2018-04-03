@@ -76,6 +76,24 @@ class Builder
 
     /**
      * @param string $field
+     * @return Builder
+     */
+    public function orWhereNull(string $field): Builder
+    {
+        return $this->or->whereNull($field);
+    }
+
+    /**
+     * @param string $field
+     * @return Builder
+     */
+    public function orWhereNotNull(string $field): Builder
+    {
+        return $this->or->whereNotNull($field);
+    }
+
+    /**
+     * @param string $field
      * @param $valueOrOperator
      * @param null $value
      * @return Builder|static|$this
@@ -83,7 +101,29 @@ class Builder
      */
     public function where(string $field, $valueOrOperator, $value = null): Builder
     {
-        return $this->add(new Where($field, $valueOrOperator, $value, $this->mode()));
+        [$field, $valueOrOperator, $value] = Where::normalize($field, $valueOrOperator, $value);
+
+        $query = new Where($field, $valueOrOperator, $value, $this->mode());
+
+        return $this->add($query);
+    }
+
+    /**
+     * @param string $field
+     * @return Builder
+     */
+    public function whereNull(string $field): Builder
+    {
+        return $this->add(new Where($field, '=', null, $this->mode()));
+    }
+
+    /**
+     * @param string $field
+     * @return Builder
+     */
+    public function whereNotNull(string $field): Builder
+    {
+        return $this->add(new Where($field, '!=', null, $this->mode()));
     }
 
     /**

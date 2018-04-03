@@ -77,8 +77,7 @@ class Where extends BaseCriterion
      */
     public function __construct(string $field, $operatorOrValue, $value = null, bool $and = true)
     {
-        [$this->field, $this->operator, $this->value] = static::normalize($field, $operatorOrValue, $value);
-        $this->and = $and;
+        [$this->field, $this->operator, $this->value, $this->and] = [$field, $operatorOrValue, $value, $and];
 
         $this->normalizeParameters();
     }

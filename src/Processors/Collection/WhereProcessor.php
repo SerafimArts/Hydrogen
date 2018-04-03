@@ -32,7 +32,7 @@ class WhereProcessor extends CriterionProcessor
 
         switch ($criterion->getOperator()) {
             case Where::OPERATOR_EQ:
-                return $collection->where($column, $criterion->getValue());
+                return $collection->where($column, '=', $criterion->getValue());
 
             case Where::OPERATOR_NEQ:
                 return $collection->where($column, '!=', $criterion->getValue());
